@@ -1,0 +1,11 @@
+{
+  "name": "instrument-closet-backend",
+  "version": "1.0.0",
+  "description": "\"Backend API for Instrument Closet.\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Bryce Dunn",
+  "license": "ISC"
+}
