@@ -3,12 +3,20 @@
   "version": "1.0.0",
   "description": "\"Backend API for Instrument Closet.\"",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "jest"
   },
   "author": "Bryce Dunn",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "bcrypt": "^5.0.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.7.1"
+  },
+  "devDependencies": {
+    "supertest": "^6.1.6"
   }
 }
