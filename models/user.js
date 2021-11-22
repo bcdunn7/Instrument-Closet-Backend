@@ -27,7 +27,7 @@ class User {
      * @param {string} username - username
      * @param {string} password - hashed password
      * 
-     * @return {User} - User Instance with { username, firstName, lastName, email, phone, isAdmin}
+     * @return {Promise<User>} - Promise when once resolved bears User Instance with { username, firstName, lastName, email, phone, isAdmin}
      * @throws {UnauthorizedError} if username or password is incorrect
      */
     static async authenticate(username, password) {
@@ -75,7 +75,7 @@ class User {
      *      {string} phone - phone
      *      {boolean} isAdmin - boolean for if user is admin
      * 
-     * @return {User} - User Instance with { username, firstName, lastName, email, phone, isAdmin}     
+     * @return {Promise<User>} - Promise when once resolved bears User Instance with { username, firstName, lastName, email, phone, isAdmin}     
      * @throws {BadRequestError} if duplicate username
      */
     static async register({ username, password, firstName, lastName, email, phone, isAdmin }) {
