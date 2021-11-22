@@ -26,6 +26,7 @@ class User {
      * @static
      * @param {string} username - username
      * @param {string} password - hashed password
+     * 
      * @return {User} - User Instance with { username, firstName, lastName, email, phone, isAdmin}
      * @throws {UnauthorizedError} if username or password is incorrect
      */
@@ -41,7 +42,7 @@ class User {
                     is_admin AS "isAdmin"
             FROM users
             WHERE username = $1`,
-            [username],
+            [username]
         );
 
         const userData = res.rows[0];
@@ -65,18 +66,46 @@ class User {
      * 
      * @async
      * @static
-     * @param {string} username - username
-     * @param {string} password - password
-     * @param {string} firstName - first name
-     * @param {string} lastName - last name
-     * @param {string} email - email
-     * @param {string} phone - phone
-     * @param {boolean} isAdmin - boolean for if user is admin
+     * @param {obj} userData - object of user data with:
+     *      {string} username
+     *      {string} password - password
+     *      {string} firstName - first name
+     *      {string} lastName - last name
+     *      {string} email - email
+     *      {string} phone - phone
+     *      {boolean} isAdmin - boolean for if user is admin
+     * 
      * @return {User} - User Instance with { username, firstName, lastName, email, phone, isAdmin}     
      * @throws {BadRequestError} if duplicate username
      */
-    static async register({ username, password, firstName, lastName, email, phone, isAdmin}) {
-        // TODO
+    static async register({ username, password, firstName, lastName, email, phone, isAdmin }) {
+        // Duplicate check
+        const usernameTaken = await db.query(`
+            SELECT username
+            FROM users
+            WHERE username = $1`, 
+            [username]);
+
+        if (usernameTaken.rows[0]) throw new BadRequestError(`Duplicate username: ${username}`);
+
+        const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
+
+        const res = await db.query(`
+            INSERT INTO users
+                (username, password, first_name, last_name, email, phone, is_admin)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING username, first_name AS "firstName", last_name AS "lastName", email, phone, is_admin AS "isAdmin"`,
+            [
+                username,
+                hashedPassword,
+                firstName,
+                lastName,
+                email,
+                phone,
+                isAdmin
+        ]);
+
+        return new User(res.rows[0])
     }
 }
 

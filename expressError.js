@@ -38,5 +38,6 @@ class BadRequestError extends ExpressError {
 export default ExpressError
 export {
     NotFoundError,
-    UnauthorizedError
+    UnauthorizedError,
+    BadRequestError
 }
