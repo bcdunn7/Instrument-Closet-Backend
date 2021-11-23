@@ -20,6 +20,7 @@ class Instrument {
     /** Find All Instruments
      * @static
      * @async
+     * 
      * @return {Promise<array>} - promise when once resolved bears instrumets array [{id, name, quantity, description, image_url}, ...]
      */
     static async findAll() {

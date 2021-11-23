@@ -35,6 +35,7 @@ describe('authenticate', () => {
         const user = await User.authenticate('user1', 'password1');
 
         expect(user).toEqual({
+            id: expect.any(Number),
             username: 'user1',
             firstName: 'u1first',
             lastName: 'u1last',
@@ -82,6 +83,7 @@ describe('register', () => {
         })
 
         expect(newUser).toEqual({
+            id: expect.any(Number),
             username: 'newuser',
             firstName: 'newfirst',
             lastName: 'newlast',
@@ -122,6 +124,33 @@ describe('register', () => {
         }
     })
 })
+
+describe('findAll', () => {
+    it('finds all users', async () => {
+        const users = await User.findAll();
+
+        expect(users[0]).toEqual({
+            id: expect.any(Number),
+            username: 'admin1',
+            firstName: 'a1first',
+            lastName: 'a1last',
+            email: 'a1@email.com',
+            phone: '1115559999',
+            isAdmin: true
+        })
+
+        expect(users.length).toEqual(3);
+    })
+
+    it('returns array of User isntances', async () => {
+        const users = await User.findAll();
+
+        expect(users).toBeInstanceOf(Array);
+
+        expect(users[0]).toBeInstanceOf(User);
+    })
+})
+
 
 
 afterEach(async () => {

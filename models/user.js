@@ -12,7 +12,8 @@ class User {
     /** Constructor for User class
      * @constructor
      */
-    constructor({ username, firstName, lastName, email, phone, isAdmin }) {
+    constructor({ id, username, firstName, lastName, email, phone, isAdmin }) {
+        this.id = id;
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -22,8 +23,8 @@ class User {
     }
 
     /** Authenticate user with username, password.
-     * @async
      * @static
+     * @async
      * @param {string} username - username
      * @param {string} password - hashed password
      * 
@@ -33,7 +34,8 @@ class User {
     static async authenticate(username, password) {
         // try to find user first
         const res = await db.query(`
-            SELECT username,
+            SELECT id,
+                    username,
                     password,
                     first_name AS "firstName",
                     last_name AS "lastName",
@@ -63,9 +65,8 @@ class User {
     }
 
     /** Register user with data
-     * 
-     * @async
      * @static
+     * @async
      * @param {obj} userData - object of user data with:
      *      {string} username
      *      {string} password - password
@@ -94,7 +95,7 @@ class User {
             INSERT INTO users
                 (username, password, first_name, last_name, email, phone, is_admin)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING username, first_name AS "firstName", last_name AS "lastName", email, phone, is_admin AS "isAdmin"`,
+            RETURNING id, username, first_name AS "firstName", last_name AS "lastName", email, phone, is_admin AS "isAdmin"`,
             [
                 username,
                 hashedPassword,
@@ -106,6 +107,29 @@ class User {
         ]);
 
         return new User(res.rows[0])
+    }
+
+    /** Find all users
+     * @static
+     * @async
+     * 
+     * @return {Promise<Array>} - promise when once resolved bears array of User instances: [{ username, firstName, lastName, email, phone, isAdmin}, ...]
+     */
+    static async findAll() {
+        const res = await db.query(`
+            SELECT id,
+                    username,
+                    first_name AS "firstName",
+                    last_name AS "lastName",
+                    email,
+                    phone,
+                    is_admin AS "isAdmin"
+            FROM users
+            ORDER BY username
+        `)
+
+        const users = res.rows.map(u => new User(u));
+        return users;
     }
 }
 
