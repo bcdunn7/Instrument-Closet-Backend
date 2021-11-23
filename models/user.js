@@ -2,7 +2,7 @@
 
 import db from '../db';
 import bcrypt from 'bcrypt';
-import { ExpressError, UnauthorizedError, BadRequestError } from '../expressError';
+import { ExpressError, UnauthorizedError, BadRequestError, NotFoundError } from '../expressError';
 
 import { BCRYPT_WORK_FACTOR } from '../config';
 
@@ -130,6 +130,52 @@ class User {
 
         const users = res.rows.map(u => new User(u));
         return users;
+    }
+
+    /** Get a user
+     * @static
+     * @async
+     * @param {string} username - username of intended user
+     * 
+     * @returns {Promise<User>} - promise when once resolved bears User instance
+     * @throws {NotFoundError} - if username not found
+     */
+    static async get(username) {
+        const res = await db.query(`
+        SELECT id,
+                username,
+                first_name AS "firstName",
+                last_name AS "lastName",
+                email,
+                phone,
+                is_admin AS "isAdmin"
+        FROM users
+        WHERE username = $1`,
+        [username]);
+
+        if (!res.rows[0]) throw new NotFoundError(`User not found: ${username}`);
+
+        const user = new User(res.rows[0]);
+        return user;
+    }
+
+    /** Deletes user
+     * @async
+     * 
+     * @return {obj} - confiming deletion
+     * @throws {NotFoundError} - if user not found
+     */
+    async remove() {
+        let res = await db.query(`
+        DELETE
+        FROM users
+        WHERE id = $1
+        RETURNING username`,
+        [this.id]);
+
+        if (!res.rows[0]) throw new NotFoundError(`User not found: Username: ${this.username}. User ID: ${this.id}.`);
+
+        return { message: `User (${this.firstName} ${this.lastName}) deleted.`}
     }
 }
 

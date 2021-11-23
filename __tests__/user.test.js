@@ -151,6 +151,79 @@ describe('findAll', () => {
     })
 })
 
+describe('get', () => {
+    it('gets user', async () => {
+        const user = await User.get('user1');
+
+        expect(user).toEqual({
+            id: expect.any(Number),
+            username: 'user1',
+            firstName: 'u1first',
+            lastName: 'u1last',
+            email: 'u1@email.com',
+            phone: '1005559999',
+            isAdmin: false
+        })
+    })
+
+    it('returns User instance', async () => {
+        const user = await User.get('user1');
+
+        expect(user).toBeInstanceOf(User);
+    })
+    
+    it('throws notfound if user not found', async () => {
+        try {            
+            const user = await User.get('notauser');
+        } catch (e) {
+            expect(e).toBeInstanceOf(NotFoundError);
+            expect(e.message).toEqual('User not found: notauser')
+        }
+    })
+})
+
+describe('remove', () => {
+    it('removes user', async () => {
+        const user1 = await User.get('user1');
+        await user1.remove();
+
+        try {
+            await User.get('user1')
+        } catch (e) {
+            expect(e).toBeInstanceOf(NotFoundError);
+        }
+    })
+  
+    it('returns deleted user message', async () => {
+        const user1 = await User.get('user1');
+
+        const res = await user1.remove();
+
+        expect(res).toEqual({
+            message: 'User (u1first u1last) deleted.'
+        })
+    })
+
+    it('throws notfound if user not found', async () => {
+        try {
+            let notauser = new User({
+                id: 1,
+                username: 'newuser',
+                firstName: 'newfirst',
+                lastName: 'newlast',
+                email: 'new@email.com',
+                phone: '1112223333',
+                isAdmin: false
+            })
+
+            await notauser.remove();
+        } catch (e) {
+            expect(e).toBeInstanceOf(NotFoundError);
+            expect(e.message).toEqual('User not found: Username: newuser. User ID: 1.')
+        }
+    })
+})
+
 
 
 afterEach(async () => {
