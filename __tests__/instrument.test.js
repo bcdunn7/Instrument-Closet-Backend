@@ -28,6 +28,84 @@ beforeEach(async () => {
     await db.query('BEGIN');
 })
 
+describe('create', () => {
+    it('creates instrument', async () => {
+        const instrument = await Instrument.create({
+            name: 'instname',
+            quantity: 5,
+            description: 'this is the inst desc',
+            imageURL: 'image.png'
+        })
+
+        expect(instrument).toEqual({
+            id: expect.any(Number),
+            name: 'instname',
+            quantity: 5,
+            description: 'this is the inst desc',
+            imageURL: 'image.png'
+        })
+    })
+
+    it('returns Instrument instance', async () => {
+        const instrument = await Instrument.create({
+            name: 'instname',
+            quantity: 5,
+            description: 'this is the inst desc',
+            imageURL: 'image.png'
+        })
+
+        expect(instrument).toBeInstanceOf(Instrument);
+    })
+
+    it('works without desc', async () => {
+        const instrument = await Instrument.create({
+            name: 'instname',
+            quantity: 5,
+            imageURL: 'image.png'
+        })
+
+        expect(instrument).toEqual({
+            id: expect.any(Number),
+            name: 'instname',
+            quantity: 5,
+            description: null,
+            imageURL: 'image.png'
+        })
+    })
+   
+    it('works without imageURL', async () => {
+        const instrument = await Instrument.create({
+            name: 'instname',
+            quantity: 5,
+            description: 'this is the inst desc',
+        })
+
+        expect(instrument).toEqual({
+            id: expect.any(Number),
+            name: 'instname',
+            quantity: 5,
+            description: 'this is the inst desc',
+            imageURL: null
+        })
+    })
+
+    it('works without desc or imageURL', async () => {
+        const instrument = await Instrument.create({
+            name: 'instname',
+            quantity: 5
+        })
+
+        expect(instrument).toEqual({
+            id: expect.any(Number),
+            name: 'instname',
+            quantity: 5,
+            description: null,
+            imageURL: null
+        })
+    })
+})
+
+
 describe('findAll', () => {
     it('returns array of all instruments', async () => {
         const instruments = await Instrument.findAll();

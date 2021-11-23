@@ -28,7 +28,7 @@ class User {
      * @param {string} username - username
      * @param {string} password - hashed password
      * 
-     * @return {Promise<User>} - Promise when once resolved bears User Instance with { username, firstName, lastName, email, phone, isAdmin}
+     * @return {Promise<User>} - Promise when resolved bears User Instance with { username, firstName, lastName, email, phone, isAdmin}
      * @throws {UnauthorizedError} if username or password is incorrect
      */
     static async authenticate(username, password) {
@@ -68,7 +68,7 @@ class User {
      * @static
      * @async
      * @param {obj} userData - object of user data with:
-     *      {string} username
+     *      {string} username - username
      *      {string} password - password
      *      {string} firstName - first name
      *      {string} lastName - last name
@@ -76,7 +76,7 @@ class User {
      *      {string} phone - phone
      *      {boolean} isAdmin - boolean for if user is admin
      * 
-     * @return {Promise<User>} - Promise when once resolved bears User Instance with { username, firstName, lastName, email, phone, isAdmin}     
+     * @return {Promise<User>} - Promise when resolved bears User Instance with { username, firstName, lastName, email, phone, isAdmin}     
      * @throws {BadRequestError} if duplicate username
      */
     static async register({ username, password, firstName, lastName, email, phone, isAdmin }) {
@@ -113,7 +113,7 @@ class User {
      * @static
      * @async
      * 
-     * @return {Promise<Array>} - promise when once resolved bears array of User instances: [{ username, firstName, lastName, email, phone, isAdmin}, ...]
+     * @return {Promise<Array>} - promise when resolved bears array of User instances: [{ username, firstName, lastName, email, phone, isAdmin}, ...]
      */
     static async findAll() {
         const res = await db.query(`
@@ -137,7 +137,7 @@ class User {
      * @async
      * @param {string} username - username of intended user
      * 
-     * @returns {Promise<User>} - promise when once resolved bears User instance
+     * @returns {Promise<User>} - promise when resolved bears User instance
      * @throws {NotFoundError} - if username not found
      */
     static async get(username) {
@@ -162,7 +162,7 @@ class User {
     /** Deletes user
      * @async
      * 
-     * @return {obj} - confiming deletion
+     * @return {Promise<obj>} - promise when resolved bears obj message confiming deletion
      * @throws {NotFoundError} - if user not found
      */
     async remove() {
