@@ -2,6 +2,7 @@
 
 import db from '../db';
 import { BadRequestError, NotFoundError } from '../expressError';
+import sqlForUpdate from '../helpers/sql';
 
 /** Instrument database model */
 class Instrument {
@@ -47,7 +48,6 @@ class Instrument {
         return instrument;
     }
 
-
     /** Find All Instruments
      * @static
      * @async
@@ -91,6 +91,34 @@ class Instrument {
 
         const instrument = new Instrument(res.rows[0]);
         return instrument;
+    }
+
+    /** Save Instrument
+     * 
+     * @async
+     * Since these are instantiated models, the instance can be update programatically and then simply saved to the database: 
+     * const inst = Instrumnet.get(1);
+     * inst.name = 'newname'; 
+     * inst.save();
+     */
+    async save() {
+        await db.query(`
+        UPDATE instruments
+        SET name=$1, quantity=$2, description=$3, image_url=$4
+        WHERE id = $5`,
+        [this.name, this.quantity, this.description, this.imageURL, this.id]);
+    }
+
+    /** Delete instrument 
+     * 
+     * @async
+     * Deletes instrument from database, called on instance.
+     */
+    async remove() {
+        await db.query(`
+        DELETE FROM instruments
+        WHERE id = $1`,
+        [this.id]);
     }
 }
 

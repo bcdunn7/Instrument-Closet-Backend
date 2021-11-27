@@ -171,6 +171,57 @@ describe('get', () => {
     })
 })
 
+describe('save', () => {
+    it('saves instrument changes', async () => {
+        const inst = await Instrument.get(testInstIds[0]);
+
+        inst.name = 'newName!';
+        inst.imageURL = 'newimage.png';
+
+        await inst.save()
+
+        expect(inst).toEqual({
+            id: testInstIds[0],
+            name: 'newName!',
+            quantity: 1,
+            description: 'desc of inst1',
+            imageURL: 'newimage.png'         
+        })
+
+        expect(inst).toBeInstanceOf(Instrument);
+    })
+
+    it('works even if no change', async () => {
+        const inst = await Instrument.get(testInstIds[0]);
+
+        await inst.save();
+
+        expect(inst).toEqual({ 
+            id: testInstIds[0],
+            name: 'inst1',
+            quantity: 1,
+            description: 'desc of inst1',
+            imageURL: 'inst1.png' 
+        })
+    })
+})
+
+describe('remove', () => {
+    it('removes instrument', async () => {
+        const inst = await Instrument.get(testInstIds[0]);
+
+        await inst.remove();
+
+        try {
+            await Instrument.get(testInstIds[0]);
+        } catch (e) {
+            expect(e).toBeInstanceOf(NotFoundError);
+        }
+    })
+})
+
+
+
 afterEach(async () => {
     await db.query('ROLLBACK');
 })
