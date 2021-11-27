@@ -2,11 +2,7 @@
 
 import Instrument from '../models/instrument';
 import db from '../db';
-import { 
-    NotFoundError, 
-    BadRequestError, 
-    UnauthorizedError
-} from '../expressError';
+import { NotFoundError } from '../expressError';
 
 const testInstIds = [];
 
@@ -219,8 +215,6 @@ describe('remove', () => {
         }
     })
 })
-
-
 
 afterEach(async () => {
     await db.query('ROLLBACK');
