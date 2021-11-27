@@ -2,7 +2,6 @@
 
 import db from '../db';
 import { BadRequestError, NotFoundError } from '../expressError';
-import sqlForUpdate from '../helpers/sql';
 
 /** Instrument database model */
 class Instrument {
