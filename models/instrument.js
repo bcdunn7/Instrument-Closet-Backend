@@ -93,8 +93,8 @@ class Instrument {
     }
 
     /** Save Instrument
-     * 
      * @async
+     * 
      * Since these are instantiated models, the instance can be update programatically and then simply saved to the database: 
      * const inst = Instrumnet.get(1);
      * inst.name = 'newname'; 
@@ -109,8 +109,8 @@ class Instrument {
     }
 
     /** Delete instrument 
-     * 
      * @async
+     * 
      * Deletes instrument from database, called on instance.
      */
     async remove() {

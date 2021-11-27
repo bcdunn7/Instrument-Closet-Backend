@@ -162,20 +162,14 @@ class User {
     /** Deletes user
      * @async
      * 
-     * @return {Promise<obj>} - promise when resolved bears obj message confiming deletion
-     * @throws {NotFoundError} - if user not found
+     * Deletes user from database, called on instance.
      */
     async remove() {
         let res = await db.query(`
         DELETE
         FROM users
-        WHERE id = $1
-        RETURNING username`,
+        WHERE id = $1`,
         [this.id]);
-
-        if (!res.rows[0]) throw new NotFoundError(`User not found: Username: ${this.username}. User ID: ${this.id}.`);
-
-        return { message: `User (${this.firstName} ${this.lastName}) deleted.`}
     }
 }
 
