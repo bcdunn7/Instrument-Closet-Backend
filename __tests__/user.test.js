@@ -182,6 +182,49 @@ describe('get', () => {
     })
 })
 
+describe('save', () => {
+    it('saves user changes', async () => {
+        const user = await User.get('user1');
+
+        user.firstName = 'newName!';
+        user.email = 'new@email.com';
+
+        await user.save()
+
+        const userCheck = await User.get('user1');
+
+        expect(userCheck).toEqual({
+            id: expect.any(Number),
+            username: 'user1',
+            firstName: 'newName!',
+            lastName: 'u1last',
+            email: 'new@email.com',
+            phone: '1005559999',
+            isAdmin: false         
+        })
+
+        expect(userCheck).toBeInstanceOf(User);
+    })
+
+    it('works even if no change', async () => {
+        const user = await User.get('user1');
+
+        await user.save();
+
+        const userCheck = await User.get('user1');
+
+        expect(userCheck).toEqual({ 
+            id: expect.any(Number),
+            username: 'user1',
+            firstName: 'u1first',
+            lastName: 'u1last',
+            email: 'u1@email.com',
+            phone: '1005559999',
+            isAdmin: false   
+        })
+    })
+})
+
 describe('remove', () => {
     it('removes user', async () => {
         const user1 = await User.get('user1');
@@ -194,8 +237,6 @@ describe('remove', () => {
         }
     })
 })
-
-
 
 afterEach(async () => {
     await db.query('ROLLBACK');

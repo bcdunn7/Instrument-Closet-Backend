@@ -2,7 +2,7 @@
 
 import db from '../db';
 import bcrypt from 'bcrypt';
-import { ExpressError, UnauthorizedError, BadRequestError, NotFoundError } from '../expressError';
+import { UnauthorizedError, BadRequestError, NotFoundError } from '../expressError';
 
 import { BCRYPT_WORK_FACTOR } from '../config';
 
@@ -157,6 +157,24 @@ class User {
 
         const user = new User(res.rows[0]);
         return user;
+    }
+
+    /** Save Instrument
+     * @async
+     * 
+     * Can only change firstName, lastName, email, and phone with this method
+     * 
+     * Since these are instantiated models, the instance can be updated programatically and then simply saved to the database:
+     * const user = User.get('user1');
+     * user.firstName = 'newname';
+     * user.save();
+     */
+    async save() {
+        await db.query(`
+        UPDATE users
+        SET first_name=$1, last_name=$2, email=$3, phone=$4
+        WHERE id=$5`,
+        [this.firstName, this.lastName, this.email, this.phone, this.id]);
     }
 
     /** Deletes user

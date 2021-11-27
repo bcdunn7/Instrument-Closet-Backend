@@ -176,7 +176,9 @@ describe('save', () => {
 
         await inst.save()
 
-        expect(inst).toEqual({
+        const instCheck = await Instrument.get(testInstIds[0]);
+
+        expect(instCheck).toEqual({
             id: testInstIds[0],
             name: 'newName!',
             quantity: 1,
@@ -184,7 +186,7 @@ describe('save', () => {
             imageURL: 'newimage.png'         
         })
 
-        expect(inst).toBeInstanceOf(Instrument);
+        expect(instCheck).toBeInstanceOf(Instrument);
     })
 
     it('works even if no change', async () => {
@@ -192,7 +194,9 @@ describe('save', () => {
 
         await inst.save();
 
-        expect(inst).toEqual({ 
+        const instCheck = await Instrument.get(testInstIds[0]);
+
+        expect(instCheck).toEqual({ 
             id: testInstIds[0],
             name: 'inst1',
             quantity: 1,
