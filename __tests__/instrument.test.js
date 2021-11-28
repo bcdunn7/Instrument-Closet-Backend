@@ -118,8 +118,16 @@ describe('create', () => {
             categories: []
         })
     })
-})
 
+    it('throws badrequest if quantity is negative', async () => {
+        await expect(async () => {
+            await Instrument.create({
+                name: 'someinst',
+                quantity: -5
+            })
+        }).rejects.toThrow('Quantity must be a nonnegative integer.')
+    })
+})
 
 describe('findAll', () => {
     it('returns array of all instruments', async () => {

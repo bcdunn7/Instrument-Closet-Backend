@@ -31,7 +31,7 @@ class Instrument {
      * @throws {BadRequestError} if quantity is a negative number or non-integer
      */
     static async create({ name, quantity, description=null, imageURL=null }) {
-        if (quantity < 0 || !Number.isInteger(quantity)) throw new BadRequestError("Quantity must be a positive integer.")
+        if (quantity < 0 || !Number.isInteger(quantity)) throw new BadRequestError("Quantity must be a nonnegative integer.")
 
         const res = await db.query(`
             INSERT INTO instruments
