@@ -142,16 +142,16 @@ class User {
      */
     static async get(username) {
         const res = await db.query(`
-        SELECT id,
-                username,
-                first_name AS "firstName",
-                last_name AS "lastName",
-                email,
-                phone,
-                is_admin AS "isAdmin"
-        FROM users
-        WHERE username = $1`,
-        [username]);
+            SELECT id,
+                    username,
+                    first_name AS "firstName",
+                    last_name AS "lastName",
+                    email,
+                    phone,
+                    is_admin AS "isAdmin"
+            FROM users
+            WHERE username = $1`,
+            [username]);
 
         if (!res.rows[0]) throw new NotFoundError(`User not found: ${username}`);
 
@@ -171,10 +171,10 @@ class User {
      */
     async save() {
         await db.query(`
-        UPDATE users
-        SET first_name=$1, last_name=$2, email=$3, phone=$4
-        WHERE id=$5`,
-        [this.firstName, this.lastName, this.email, this.phone, this.id]);
+            UPDATE users
+            SET first_name=$1, last_name=$2, email=$3, phone=$4
+            WHERE id=$5`,
+            [this.firstName, this.lastName, this.email, this.phone, this.id]);
     }
 
     /** Deletes user
@@ -183,11 +183,11 @@ class User {
      * Deletes user from database, called on instance.
      */
     async remove() {
-        let res = await db.query(`
-        DELETE
-        FROM users
-        WHERE id = $1`,
-        [this.id]);
+        await db.query(`
+            DELETE
+            FROM users
+            WHERE id = $1`,
+            [this.id]);
     }
 }
 

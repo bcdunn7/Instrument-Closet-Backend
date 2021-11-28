@@ -5,19 +5,34 @@ import db from '../db';
 import { NotFoundError } from '../expressError';
 
 const testInstIds = [];
+const testCatIds = [];
 
 beforeAll(async () => {
     await db.query('DELETE FROM instruments');
+    await db.query('DELETE FROM categories');
 
     const resultsInsts = await db.query(`
-    INSERT INTO instruments (name, quantity, description, image_url) 
-    VALUES ('inst1', 1, 'desc of inst1', 'inst1.png'),
-    ('inst2', 2, 'desc of inst2', 'inst2.png'),
-    ('inst3', 3, 'desc of inst3', 'inst3.png')
-    RETURNING id
-    `)
+        INSERT INTO instruments (name, quantity, description, image_url) 
+        VALUES ('inst1', 1, 'desc of inst1', 'inst1.png'),
+        ('inst2', 2, 'desc of inst2', 'inst2.png'),
+        ('inst3', 3, 'desc of inst3', 'inst3.png')
+        RETURNING id
+        `);
 
     testInstIds.splice(0, 0, ...resultsInsts.rows.map(i => i.id));
+
+    const resultsCats = await db.query(`
+        INSERT INTO categories (category)
+        VALUES ('catForInstTest')
+        RETURNING id`);
+
+    testCatIds.splice(0, 0, ...resultsCats.rows.map(c => c.id));
+
+    await db.query(`
+        INSERT INTO instrument_category
+            (instrument_id, category_id)
+        VALUES ($1, $2)`,
+        [testInstIds[2], testCatIds[0]])
 })
 
 beforeEach(async () => {
@@ -38,7 +53,8 @@ describe('create', () => {
             name: 'instname',
             quantity: 5,
             description: 'this is the inst desc',
-            imageURL: 'image.png'
+            imageURL: 'image.png',
+            categories: []
         })
     })
 
@@ -65,7 +81,8 @@ describe('create', () => {
             name: 'instname',
             quantity: 5,
             description: null,
-            imageURL: 'image.png'
+            imageURL: 'image.png',
+            categories: []
         })
     })
    
@@ -81,7 +98,8 @@ describe('create', () => {
             name: 'instname',
             quantity: 5,
             description: 'this is the inst desc',
-            imageURL: null
+            imageURL: null,
+            categories: []
         })
     })
 
@@ -96,7 +114,8 @@ describe('create', () => {
             name: 'instname',
             quantity: 5,
             description: null,
-            imageURL: null
+            imageURL: null,
+            categories: []
         })
     })
 })
@@ -112,21 +131,24 @@ describe('findAll', () => {
                 name: 'inst1',
                 quantity: 1,
                 description: 'desc of inst1',
-                imageURL: 'inst1.png' 
+                imageURL: 'inst1.png',
+                categories: [] 
             },
             { 
                 id: testInstIds[1],
                 name: 'inst2',
                 quantity: 2,
                 description: 'desc of inst2',
-                imageURL: 'inst2.png' 
+                imageURL: 'inst2.png',
+                categories: [] 
             },
             { 
                 id: testInstIds[2],
                 name: 'inst3',
                 quantity: 3,
                 description: 'desc of inst3',
-                imageURL: 'inst3.png' 
+                imageURL: 'inst3.png',
+                categories: [] 
             }
         ])
     })
@@ -147,7 +169,8 @@ describe('get', () => {
             name: 'inst1',
             quantity: 1,
             description: 'desc of inst1',
-            imageURL: 'inst1.png' 
+            imageURL: 'inst1.png',
+            categories: [] 
         })
     })
 
@@ -155,6 +178,19 @@ describe('get', () => {
         const instrument = await Instrument.get(testInstIds[0]);
 
         expect(instrument).toBeInstanceOf(Instrument);
+    })
+
+    it('returns with categories if avail', async () => {
+        const instrument = await Instrument.get(testInstIds[2]);
+        
+        expect(instrument).toEqual({
+            id: testInstIds[2],
+            name: 'inst3',
+            quantity: 3,
+            description: 'desc of inst3',
+            imageURL: 'inst3.png',
+            categories: [testCatIds[0]]
+        })
     })
 
     it('throws notfound if id not found', async () => {
@@ -183,7 +219,8 @@ describe('save', () => {
             name: 'newName!',
             quantity: 1,
             description: 'desc of inst1',
-            imageURL: 'newimage.png'         
+            imageURL: 'newimage.png',
+            categories: []         
         })
 
         expect(instCheck).toBeInstanceOf(Instrument);
@@ -201,7 +238,8 @@ describe('save', () => {
             name: 'inst1',
             quantity: 1,
             description: 'desc of inst1',
-            imageURL: 'inst1.png' 
+            imageURL: 'inst1.png',
+            categories: [] 
         })
     })
 })
@@ -216,6 +254,36 @@ describe('remove', () => {
             await Instrument.get(testInstIds[0]);
         } catch (e) {
             expect(e).toBeInstanceOf(NotFoundError);
+        }
+    })
+})
+
+describe('addCategory', () => {
+    it('adds instrument_category', async () => {
+        const inst = await Instrument.get(testInstIds[0]);
+
+        await inst.addCategory(testCatIds[0]);
+
+        const instCheck = await Instrument.get(testInstIds[0]);
+
+        expect(instCheck).toEqual({ 
+            id: testInstIds[0],
+            name: 'inst1',
+            quantity: 1,
+            description: 'desc of inst1',
+            imageURL: 'inst1.png',
+            categories: [testCatIds[0]] 
+        })
+    })
+
+    it('throws notfound if category not found', async () => {
+        try {
+            const inst = await Instrument.get(testInstIds[1]);
+
+            await inst.addCategory(9999)
+        } catch (e) {
+            expect(e).toBeInstanceOf(NotFoundError);
+            expect(e.message).toEqual('No Category with id: 9999');
         }
     })
 })
