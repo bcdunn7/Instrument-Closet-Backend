@@ -2,7 +2,7 @@
 
 import Instrument from '../models/instrument';
 import db from '../db';
-import { NotFoundError } from '../expressError';
+import { BadRequestError, NotFoundError } from '../expressError';
 
 const testInstIds = [];
 const testCatIds = [];
@@ -250,6 +250,20 @@ describe('save', () => {
             imageURL: 'inst1.png',
             categories: [] 
         })
+    })
+
+    it('throws badrequest if quantity is negative', async () => {
+        expect.assertions(2);
+        try {
+            const inst = await Instrument.get(testInstIds[0]);
+
+            inst.quantity = -5;
+
+            await inst.save();
+        } catch (e) {
+            expect(e).toBeInstanceOf(BadRequestError);
+            expect(e.message).toEqual('Quantity must be a nonnegative integer.')
+        }
     })
 })
 

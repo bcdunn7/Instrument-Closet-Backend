@@ -109,6 +109,9 @@ class Instrument {
      * inst.save();
      */
     async save() {
+        if (this.quantity < 0 || !Number.isInteger(this.quantity)) throw new BadRequestError("Quantity must be a nonnegative integer.")
+
+
         await db.query(`
             UPDATE instruments
             SET name=$1, quantity=$2, description=$3, image_url=$4
