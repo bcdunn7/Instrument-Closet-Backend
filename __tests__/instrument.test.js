@@ -202,6 +202,7 @@ describe('get', () => {
     })
 
     it('throws notfound if id not found', async () => {
+        expect.assertions(2);
         try {
             await Instrument.get(9999);
         } catch (e) {
@@ -285,6 +286,7 @@ describe('addCategory', () => {
     })
 
     it('throws notfound if category not found', async () => {
+        expect.assertions(2);
         try {
             const inst = await Instrument.get(testInstIds[1]);
 

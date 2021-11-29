@@ -52,6 +52,7 @@ describe('authenticate', () => {
     })
 
     it('throws unauth if no such user', async () => {
+        expect.assertions(2);
         try {
             await User.authenticate('notauser', 'password');
         } catch (e) {
@@ -61,6 +62,7 @@ describe('authenticate', () => {
     })
 
     it('throws unauth if wrong pasword', async () => {
+        expect.assertions(2);
         try {
             await User.authenticate('user1', 'wrongpass');
         } catch (e) {
@@ -108,6 +110,7 @@ describe('register', () => {
     })
 
     it('throws badrequest if duplicate username', async () => {
+        expect.assertions(2);
         try {
             await User.register({
                 username: 'user1',
@@ -173,8 +176,9 @@ describe('get', () => {
     })
     
     it('throws notfound if user not found', async () => {
+        expect.assertions(2);
         try {            
-            const user = await User.get('notauser');
+            await User.get('notauser');
         } catch (e) {
             expect(e).toBeInstanceOf(NotFoundError);
             expect(e.message).toEqual('User not found: notauser')

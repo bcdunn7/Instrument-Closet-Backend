@@ -38,6 +38,7 @@ describe('create', () => {
     })
 
     it('throws badrequest if duplicate category', async () => {
+        expect.assertions(2);
         try {
             await Category.create('cat1')
         } catch (e) {
@@ -87,6 +88,7 @@ describe('get', () => {
     })
 
     it('throws notfound if id not found', async () => {
+        expect.assertions(2);
         try {
             await Category.get(9999)
         } catch (e) {
