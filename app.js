@@ -7,6 +7,7 @@ import { NotFoundError } from './expressError';
 import { authenticateJWT } from './middleware/authMiddleware';
 import userRoutes from './routes/users';
 import authRoutes from './routes/auth';
+import instRoutes from './routes/instruments';
 
 const morgan = require('morgan');
 
@@ -19,6 +20,7 @@ app.use(authenticateJWT);
 
 app.use('/users', userRoutes)
 app.use('/auth', authRoutes)
+app.use('/instruments', instRoutes)
 
 
 /** 404 Error */

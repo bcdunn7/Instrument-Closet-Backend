@@ -95,6 +95,46 @@ describe('GET /users', () => {
             ]
         })
     })
+    
+    it('gets all users: admin, token via body', async () => {
+        const resp = await request(app)
+            .get('/users')
+            .send({
+                _token: a1token
+            });
+
+        expect(resp.body).toEqual({
+            users: [
+                {
+                    id: testUserIds[2],
+                    username: 'testadmin1',
+                    firstName: 'a1first',
+                    lastName: 'a1last',
+                    email: 'a1@email.com',
+                    phone: '2112223333',
+                    isAdmin: true
+                },
+                {
+                    id: testUserIds[0],
+                    username: 'testuser1',
+                    firstName: 'u1first',
+                    lastName: 'u1last',
+                    email: 'u1@email.com',
+                    phone: '1112223333',
+                    isAdmin: false
+                },
+                {
+                    id: testUserIds[1],
+                    username: 'testuser2',
+                    firstName: 'u2first',
+                    lastName: 'u2last',
+                    email: 'u2@email.com',
+                    phone: '2223334444',
+                    isAdmin: false
+                }
+            ]
+        })
+    })
 
     it('unauth for nonadmin', async () => {
         const resp = await request(app)
@@ -184,6 +224,42 @@ describe('PATCH /users/:username', () => {
                 phone: '9998887777'
             })
             .set('authorization', `Bearer ${a1token}`);
+    
+        const userCheck = await User.get('testuser1');
+        
+        expect(resp.body).toEqual({
+            user: {
+                id: testUserIds[0],
+                username: 'testuser1',
+                firstName: 'newfirstname',
+                lastName: 'newlastname',
+                email: 'new@email.com',
+                phone: '9998887777',
+                isAdmin: false
+            }
+        })
+
+        expect(userCheck).toEqual({
+            id: testUserIds[0],
+            username: 'testuser1',
+            firstName: 'newfirstname',
+            lastName: 'newlastname',
+            email: 'new@email.com',
+            phone: '9998887777',
+            isAdmin: false
+        })
+    })
+    
+    it('updates user: admin, token via body', async () => {
+        const resp = await request(app)
+            .patch('/users/testuser1')
+            .send({
+                _token: a1token,
+                firstName: "newfirstname",
+                lastName: "newlastname",
+                email: "new@email.com",
+                phone: '9998887777'
+            });
     
         const userCheck = await User.get('testuser1');
         
