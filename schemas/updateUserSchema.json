@@ -14,6 +14,11 @@
     "title": "The root schema",
     "type": "object",
     "properties": {
+        "_token": {
+            "$id": "#/properties/_token",
+            "default": "",
+            "type": "string"
+        },
         "firstName": {
             "$id": "#/properties/firstName",
             "default": "",

@@ -75,6 +75,8 @@ router.patch('/:username', ensureCorrectUserOrAdmin, async (req, res, next) => {
 })
 
 /** DELETE /users/[username]
+ * 
+ * @return => { deleted: username }
  *  
  * AUTH: admin or same user as [username]
  */
