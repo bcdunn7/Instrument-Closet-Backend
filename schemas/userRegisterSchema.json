@@ -1,0 +1,60 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "default": {},
+    "required": [
+        "username",
+        "password",
+        "firstName",
+        "lastName",
+        "email",
+        "phone"
+    ],
+    "properties": {
+        "username": {
+            "$id": "#/properties/username",
+            "type": "string",
+            "maxLength": 128,
+            "title": "The username schema",
+            "default": ""
+        },
+        "password": {
+            "$id": "#/properties/password",
+            "type": "string",
+            "title": "The password schema",
+            "default": ""
+        },
+        "firstName": {
+            "$id": "#/properties/firstName",
+            "type": "string",
+            "maxLength": 128,
+            "title": "The firstName schema",
+            "default": ""
+        },
+        "lastName": {
+            "$id": "#/properties/lastName",
+            "type": "string",
+            "maxLength": 128,
+            "title": "The lastName schema",
+            "default": ""
+        },
+        "email": {
+            "$id": "#/properties/email",
+            "type": "string",
+            "maxLength": 128,
+            "title": "The email schema",
+            "default": "",
+            "format": "email"
+        },
+        "phone": {
+            "$id": "#/properties/phone",
+            "type": "string",
+            "maxLength": 64,
+            "title": "The phone schema",
+            "default": ""
+        }
+    },
+    "additionalProperties": false
+}

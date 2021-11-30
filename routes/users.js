@@ -9,7 +9,7 @@ import { BadRequestError } from '../expressError';
 
 const router = express.Router();
 
-/** GET / => { users: [{username, firstName, lastName, email, phone, isAdmin}, ...]} 
+/** GET /users => { users: [{username, firstName, lastName, email, phone, isAdmin}, ...]} 
  * 
  * @return list of all users
  * 
@@ -25,7 +25,7 @@ router.get('/', ensureAdmin, async (req, res, next) => {
 })
 
 
-/** GET /[username] => { user }
+/** GET /users/[username] => { user }
  * 
  * @return User instance => {username, firstName, lastName, email, phone, isAdmin}
  * 
@@ -41,7 +41,7 @@ router.get('/:username', ensureCorrectUserOrAdmin, async (req, res, next) => {
 })
 
 
-/** PATCH /username  { userData } => { user }
+/** PATCH /users/username  { userData } => { user }
  * 
  * userData can include:
  *      { firstName, lastName, email, phone }
@@ -74,7 +74,7 @@ router.patch('/:username', ensureCorrectUserOrAdmin, async (req, res, next) => {
     }
 })
 
-/** DELETE /[username]
+/** DELETE /users/[username]
  *  
  * AUTH: admin or same user as [username]
  */
