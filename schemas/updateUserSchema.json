@@ -1,0 +1,48 @@
+{
+    "$id": "http://example.com/example.json",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "default": {},
+    "description": "The root schema comprises the entire JSON document.",
+    "examples": [
+        {
+            "firstName": "asdf",
+            "lastName": "las",
+            "email": "ua@email.com",
+            "phone": "1112223333"
+        }
+    ],
+    "title": "The root schema",
+    "type": "object",
+    "properties": {
+        "firstName": {
+            "$id": "#/properties/firstName",
+            "default": "",
+            "maxLength": 128,
+            "title": "The firstName schema",
+            "type": "string"
+        },
+        "lastName": {
+            "$id": "#/properties/lastName",
+            "default": "",
+            "title": "The lastName schema",
+            "maxLength": 128,
+            "type": "string"
+        },
+        "email": {
+            "$id": "#/properties/email",
+            "default": "",
+            "maxLength": 128,
+            "title": "The email schema",
+            "type": "string",
+            "format": "email"
+        },
+        "phone": {
+            "$id": "#/properties/phone",
+            "default": "",
+            "maxLength": 64,
+            "title": "The phone schema",
+            "type": "string"
+        }
+    },
+    "additionalProperties": true
+}

@@ -4,12 +4,19 @@
 
 import express from 'express';
 import { NotFoundError } from './expressError';
+import { authenticateJWT } from './middleware/authMiddleware';
+import userRoutes from './routes/users';
 
 const morgan = require('morgan');
 
 const app = express();
 
+
+app.use(express.json());
 app.use(morgan('tiny'));
+app.use(authenticateJWT);
+
+app.use('/users', userRoutes)
 
 
 /** 404 Error */
