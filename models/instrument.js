@@ -2,6 +2,7 @@
 
 import db from '../db';
 import { BadRequestError, NotFoundError } from '../expressError';
+import Category from './category';
 
 /** Instrument database model */
 class Instrument {
@@ -52,7 +53,7 @@ class Instrument {
      * @static
      * @async
      * 
-     * @return {Promise<array>} - promise when resolved bears instrumets array [{id, name, quantity, description, image_url}, ...]
+     * @return {Promise<array>} - promise when resolved bears instrumets array [{id, name, quantity, description, imageURL, categories: [{id, category}, ...]}, ...]
      */
     static async findAll() {
         const res = await db.query(`
@@ -64,7 +65,11 @@ class Instrument {
             FROM instruments
         `)
 
-        const instruments = res.rows.map(i => new Instrument(i));
+        const instruments = await Promise.all(res.rows.map(async (i) => {
+            const inst = new Instrument(i);
+            inst.categories = await inst.getCategories();
+            return inst;
+        }));
         return instruments;
     }
 
@@ -73,7 +78,7 @@ class Instrument {
      * @async
      * @param {int} id - instrument id
      * 
-     * @return {Promise<Instrument>} - promise when resolved bears Instrument instance {id, name, quantity, description, image_url}
+     * @return {Promise<Instrument>} - promise when resolved bears Instrument instance {id, name, quantity, description, image_url, categories: [{id, category}, ...]}
      * @throws {NotFoundError} if instrument with id not found
      */
     static async get(id) {
@@ -89,15 +94,28 @@ class Instrument {
 
         if (!res.rows[0]) throw new NotFoundError(`No Instrument with id: ${id}`);
 
-        const instCatRes = await db.query(`
-            SELECT i.category_id
-            FROM instrument_category AS i
-            WHERE i.instrument_id = $1`,
-            [id]);
-
         const instrument = new Instrument(res.rows[0]);
-        instrument.categories = instCatRes.rows.map(c => c.category_id);
+        instrument.categories = await instrument.getCategories();
         return instrument;
+    }
+
+    /** Get Categories
+     * @async
+     * 
+     * Called on instance.
+     * @return {Promise<Array>} array of categories that the instrument belongs to
+     */
+    async getCategories() {
+        const res = await db.query(`
+            SELECT c.id, c.category
+            FROM categories c
+            JOIN instrument_category n
+            ON c.id = n.category_id
+            WHERE n.instrument_id = $1`,
+            [this.id])
+
+        const cats = res.rows.map(c => new Category(c));
+        return cats;
     }
 
     /** Save Instrument

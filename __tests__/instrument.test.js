@@ -23,7 +23,7 @@ beforeAll(async () => {
 
     const resultsCats = await db.query(`
         INSERT INTO categories (category)
-        VALUES ('catForInstTest')
+        VALUES ('catForInstTest'), ('catForInstTest2')
         RETURNING id`);
 
     testCatIds.splice(0, 0, ...resultsCats.rows.map(c => c.id));
@@ -31,8 +31,8 @@ beforeAll(async () => {
     await db.query(`
         INSERT INTO instrument_category
             (instrument_id, category_id)
-        VALUES ($1, $2)`,
-        [testInstIds[2], testCatIds[0]])
+        VALUES ($1, $2), ($3, $4)`,
+        [testInstIds[2], testCatIds[0], testInstIds[2], testCatIds[1]])
 })
 
 beforeEach(async () => {
@@ -156,7 +156,16 @@ describe('findAll', () => {
                 quantity: 3,
                 description: 'desc of inst3',
                 imageURL: 'inst3.png',
-                categories: [] 
+                categories: [
+                    {
+                        id: testCatIds[0],
+                        category: 'catForInstTest'
+                    },
+                    {
+                        id: testCatIds[1],
+                        category: 'catForInstTest2'
+                    }
+                ] 
             }
         ])
     })
@@ -197,7 +206,16 @@ describe('get', () => {
             quantity: 3,
             description: 'desc of inst3',
             imageURL: 'inst3.png',
-            categories: [testCatIds[0]]
+            categories: [
+                {
+                    id: testCatIds[0],
+                    category: 'catForInstTest'
+                },
+                {
+                    id: testCatIds[1],
+                    category: 'catForInstTest2'
+                }
+            ] 
         })
     })
 
@@ -209,6 +227,31 @@ describe('get', () => {
             expect(e).toBeInstanceOf(NotFoundError);
             expect(e.message).toEqual('No Instrument with id: 9999')
         }
+    })
+})
+
+describe('getCategories', () => {
+    it('returns array of categories', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+        const cats = await inst.getCategories();
+
+        expect(cats).toEqual([
+            {
+                id: testCatIds[0],
+                category: 'catForInstTest'
+            },
+            {
+                id: testCatIds[1],
+                category: 'catForInstTest2'
+            }
+        ])
+    })
+    
+    it('returns empty array if no categories', async () => {
+        const inst = await Instrument.get(testInstIds[0]);
+        const cats = await inst.getCategories();
+
+        expect(cats).toEqual([])
     })
 })
 
@@ -295,7 +338,10 @@ describe('addCategory', () => {
             quantity: 1,
             description: 'desc of inst1',
             imageURL: 'inst1.png',
-            categories: [testCatIds[0]] 
+            categories: [{
+                id: testCatIds[0],
+                category: 'catForInstTest'
+            }] 
         })
     })
 
