@@ -4,7 +4,8 @@ import express from 'express';
 import { ensureAdmin } from '../middleware/authMiddleware';
 import Instrument from '../models/instrument';
 import jsonschema from 'jsonschema';
-import instrumentSchema from '../schemas/instrumentSchema.json';
+import newInstrumentSchema from '../schemas/newInstrumentSchema.json';
+import updateInstrumentSchema from '../schemas/updateInstrumentSchema.json';
 import { BadRequestError } from '../expressError';
 
 const router = express.Router();
@@ -20,7 +21,7 @@ const router = express.Router();
  */
 router.post('/', ensureAdmin, async (req, res, next) => {
     try {
-        const validator = jsonschema.validate(req.body, instrumentSchema);
+        const validator = jsonschema.validate(req.body, newInstrumentSchema);
         if (!validator.valid) {
             const errs = validator.errors.map(e => e.stack);
             throw new BadRequestError(errs);
@@ -61,7 +62,7 @@ router.get('/', async (req, res, next) => {
 */
 router.get('/:instId', async (req, res, next) => {
     try {
-        const instrument = await Instrument.get(instId);
+        const instrument = await Instrument.get(req.params.instId);
         return res.json({ instrument })
     } catch (e) {
         return next(e);
@@ -80,7 +81,7 @@ router.get('/:instId', async (req, res, next) => {
 */
 router.patch('/:instId', ensureAdmin, async (req, res, next) => {
     try {
-        const validator = jsonschema.validate(req.body, instrumentSchema);
+        const validator = jsonschema.validate(req.body, updateInstrumentSchema);
         if (!validator.valid) {
             const errs = validator.errors.map(e => e.stack);
             throw new BadRequestError(errs);
@@ -94,7 +95,7 @@ router.patch('/:instId', ensureAdmin, async (req, res, next) => {
         if (description) instrument.description = description;
         if (imageURL) instrument.imageURL = imageURL;
 
-        await user.save();
+        await instrument.save();
 
         return res.json({ instrument })
     } catch (e) {
@@ -109,7 +110,7 @@ router.patch('/:instId', ensureAdmin, async (req, res, next) => {
  * 
  * AUTH: admin
  */
-router.delete('/instruments/:instId', ensureAdmin, async (req, res, next) => {
+router.delete('/:instId', ensureAdmin, async (req, res, next) => {
     try {
         const instrument = await Instrument.get(req.params.instId);
         await instrument.remove();
