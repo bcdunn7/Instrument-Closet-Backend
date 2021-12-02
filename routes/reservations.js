@@ -130,7 +130,7 @@ router.delete('/:resvId', ensureLoggedIn, async (req, res, next) => {
     try {
         const reservation = await Reservation.get(req.params.resvId);
         await reservation.remove();
-        return res.json({ deleted: reservation.id })
+        return res.json({ deleted: reservation.id });
     } catch (e) {
         return next(e);
     }
