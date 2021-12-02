@@ -13,7 +13,7 @@
         "_token": {
             "$id": "#/properties/_token",
             "default": "",
-            "type": "integer"
+            "type": "string"
         },
         "userId": {
             "$id": "#/properties/userId",

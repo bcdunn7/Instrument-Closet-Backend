@@ -8,6 +8,7 @@ import { authenticateJWT } from './middleware/authMiddleware';
 import userRoutes from './routes/users';
 import authRoutes from './routes/auth';
 import instRoutes from './routes/instruments';
+import resvRoutes from './routes/reservations';
 
 const morgan = require('morgan');
 
@@ -18,9 +19,10 @@ app.use(express.json());
 app.use(morgan('tiny'));
 app.use(authenticateJWT);
 
-app.use('/users', userRoutes)
-app.use('/auth', authRoutes)
-app.use('/instruments', instRoutes)
+app.use('/users', userRoutes);
+app.use('/auth', authRoutes);
+app.use('/instruments', instRoutes);
+app.use('/reservations', resvRoutes);
 
 
 /** 404 Error */

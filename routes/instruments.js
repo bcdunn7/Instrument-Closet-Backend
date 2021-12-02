@@ -104,7 +104,7 @@ router.patch('/:instId', ensureAdmin, async (req, res, next) => {
 })
 
 
-/** DELETE /instruments/[instId] => { deleted: instId }
+/** DELETE /instruments/[instId] => { deleted: instName (ID: instId) }
  * 
  * @return => { deleted: instName (ID: instId)}
  * 
@@ -114,7 +114,7 @@ router.delete('/:instId', ensureAdmin, async (req, res, next) => {
     try {
         const instrument = await Instrument.get(req.params.instId);
         await instrument.remove();
-        return res.json({ deleted: `${instrument.name} (ID: ${req.params.instId})`})
+        return res.json({ deleted: `${instrument.name} (ID: ${req.params.instId})`});
     } catch (e) {
         return next(e);
     }
