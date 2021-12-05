@@ -54,9 +54,9 @@ router.post('/', ensureLoggedIn, async (req, res, next) => {
  * 
  * @return list of all reservations
  * 
- * AUTH: none
+ * AUTH: logged-in
 */
-router.get('/', async (req, res,next) => {
+router.get('/', ensureLoggedIn, async (req, res,next) => {
     try {
         const reservations = await Reservation.findAll();
         return res.json({ reservations })
@@ -70,9 +70,9 @@ router.get('/', async (req, res,next) => {
  * 
  * @return Reservation instance => {id, userId, instrumentId, quantity, startTime, endTime, notes}
  * 
- * AUTH: none
+ * AUTH: logged-in
  */
-router.get('/:resvId', async (req, res, next) => {
+router.get('/:resvId', ensureLoggedIn, async (req, res, next) => {
     try {
         const reservation = await Reservation.get(req.params.resvId);
         return res.json({ reservation })

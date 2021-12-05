@@ -298,9 +298,10 @@ describe('POST /reservations', () => {
 })
 
 describe('GET /reservations', () => {
-    it('returns arr of reservations', async () => {
+    it('returns arr of reservations: user', async () => {
         const resp = await request(app)
-            .get('/reservations');
+            .get('/reservations')
+            .set('authorization', `Bearer ${u1token}`);
 
         expect(resp.body).toEqual({
             reservations : [
@@ -319,7 +320,7 @@ describe('GET /reservations', () => {
 })
 
 describe('GET /reservations/:resvId', () => {
-    it('returns reservation: anon', async () => {
+    it('returns reservation: user', async () => {
         const resvResp = await request(app)
             .post('/reservations')
             .send({
@@ -333,7 +334,8 @@ describe('GET /reservations/:resvId', () => {
             .set('authorization', `Bearer ${a1token}`);
 
         const resp = await request(app)
-            .get(`/reservations/${resvResp.body.reservation.id}`);
+            .get(`/reservations/${resvResp.body.reservation.id}`)
+            .set('authorization', `Bearer ${u2token}`);
 
         expect(resp.body).toEqual({
             reservation: {
@@ -350,7 +352,8 @@ describe('GET /reservations/:resvId', () => {
 
     it('not found for no such reservation', async () => {
         const resp = await request(app)
-            .get('/reservations/12341234');
+            .get('/reservations/12341234')
+            .set('authorization', `Bearer ${u1token}`);
 
         expect(resp.statusCode).toEqual(404);
         expect(resp.body.error.message).toEqual(`No Reservation with id: 12341234`);
