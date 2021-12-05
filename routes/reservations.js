@@ -6,6 +6,7 @@ import Reservation from '../models/reservation';
 import User from '../models/user';
 import jsonschema from 'jsonschema';
 import newReservationSchema from '../schemas/newReservationSchema.json';
+import updateReservationSchema from '../schemas/updateReservationSchema.json';
 import { BadRequestError, UnauthorizedError } from '../expressError';
 
 const router = express.Router();
@@ -92,19 +93,17 @@ router.get('/:resvId', async (req, res, next) => {
  */
 router.patch('/:resvId', ensureLoggedIn, async (req, res, next) => {
     try {
-        const validator = jsonschema.validate(req.body, 
-        //TODO: write schema
-            );
+        const validator = jsonschema.validate(req.body, updateReservationSchema);
         if (!validator.valid) {
             const errs = validator.errors.map(e => e.stack);
             throw new BadRequestError(errs);
         }
 
         const reservation = await Reservation.get(req.params.resvId);
-
-        // maybe i just write middleware for this if possible
-        //check if userId on reservation is same user as one on request or admin
-
+        const currUser = await User.get(res.locals.user.username);
+        
+        if (!(res.locals.user && (res.locals.user.isAdmin || currUser.id === reservation.userId))) throw new UnauthorizedError('Must be admin or user who made the reservation.');
+        
         const { quantity, startTime, endTime, notes } = req.body;
         if (quantity) reservation.quantity = quantity;
         if (startTime) reservation.startTime = startTime;
@@ -113,7 +112,10 @@ router.patch('/:resvId', ensureLoggedIn, async (req, res, next) => {
 
         await reservation.save();
 
-        return res.json({ reservation })
+        // "Need" this step - can't just return reservation since timestamp is formatted differently when coming out of database
+        const updatedResv = await Reservation.get(req.params.resvId)
+
+        return res.json({ reservation: updatedResv })
     } catch (e) {
         return next(e);
     }
@@ -129,6 +131,11 @@ router.patch('/:resvId', ensureLoggedIn, async (req, res, next) => {
 router.delete('/:resvId', ensureLoggedIn, async (req, res, next) => {
     try {
         const reservation = await Reservation.get(req.params.resvId);
+
+        const currUser = await User.get(res.locals.user.username);
+        
+        if (!(res.locals.user && (res.locals.user.isAdmin || currUser.id === reservation.userId))) throw new UnauthorizedError('Must be admin or user who made the  reservation.');
+
         await reservation.remove();
         return res.json({ deleted: reservation.id });
     } catch (e) {

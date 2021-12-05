@@ -18,6 +18,7 @@ const a1token = createToken({ username: 'testadmin1', isAdmin: true});
 const testUserIds = [];
 const testInstIds = [];
 const testCatIds = [];
+const testResvIds = [];
 
 beforeAll(async () => {
     await db.query('DELETE FROM users');
@@ -83,6 +84,17 @@ beforeAll(async () => {
     testCatIds.push(cat1.id);
 
     await inst1.addCategory(cat1.id);
+
+    const resv1 = await Reservation.create({
+        userId: testUserIds[0],
+        instrumentId: testInstIds[0],
+        quantity: 1,
+        startTime: '2022-01-01 11:00:00',
+        endTime: '2022-01-01 13:00:00',
+        notes: 'resv notes'
+    });
+
+    testResvIds.push(resv1.id);
 })
 
 beforeEach(async () => {
@@ -287,18 +299,6 @@ describe('POST /reservations', () => {
 
 describe('GET /reservations', () => {
     it('returns arr of reservations', async () => {
-        await request(app)
-            .post('/reservations')
-            .send({
-                userId: testUserIds[0],
-                instrumentId: testInstIds[0],
-                quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
-                notes: 'resv notes'
-            })
-            .set('authorization', `Bearer ${a1token}`);
-
         const resp = await request(app)
             .get('/reservations');
 
@@ -357,6 +357,224 @@ describe('GET /reservations/:resvId', () => {
     })
 })
 
+describe('PATCH /reservations/:resvId', () => {
+    it('returns updated reservation: admin', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.body).toEqual({
+            reservation: {
+                id: testResvIds[0],
+                userId: testUserIds[0],
+                instrumentId: testInstIds[0],
+                quantity: 1,
+                startTime: '2022-01-01T17:00:00.000Z',
+                endTime: '2022-01-01T19:00:00.000Z',
+                notes: 'newnotes'
+            }
+        })
+
+        const resvCheck = await Reservation.get(testResvIds[0]);
+
+        expect(resvCheck.notes).toEqual('newnotes');
+    })
+   
+    it('returns updated reservation: admin, token via body', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                _token: a1token,
+                notes: 'newnotes'
+            })
+
+        expect(resp.body).toEqual({
+            reservation: {
+                id: testResvIds[0],
+                userId: testUserIds[0],
+                instrumentId: testInstIds[0],
+                quantity: 1,
+                startTime: '2022-01-01T17:00:00.000Z',
+                endTime: '2022-01-01T19:00:00.000Z',
+                notes: 'newnotes'
+            }
+        })
+    })
+    
+    it('returns updated reservation: correct user', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes'
+            })
+            .set('authorization', `Bearer ${u1token}`);
+
+        expect(resp.body).toEqual({
+            reservation: {
+                id: testResvIds[0],
+                userId: testUserIds[0],
+                instrumentId: testInstIds[0],
+                quantity: 1,
+                startTime: '2022-01-01T17:00:00.000Z',
+                endTime: '2022-01-01T19:00:00.000Z',
+                notes: 'newnotes'
+            }
+        })
+    })
+    
+    it('returns updated reservation, changes everything: correct user', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes',
+                startTime: '2022-01-05 01:30:00',
+                endTime: '2022-03-04 09:15:00',
+                quantity: 2
+            })
+            .set('authorization', `Bearer ${u1token}`);
+
+        expect(resp.body).toEqual({
+            reservation: {
+                id: testResvIds[0],
+                userId: testUserIds[0],
+                instrumentId: testInstIds[0],
+                quantity: 2,
+                startTime: '2022-01-05T07:30:00.000Z',
+                endTime: '2022-03-04T15:15:00.000Z',
+                notes: 'newnotes'
+            }
+        })
+    })
+
+    it('unauth if anon', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes'
+            })
+
+        expect(resp.statusCode).toEqual(401);
+        expect(resp.body.error.message).toEqual('Must be logged in.')
+    })
+    
+    it('unauth if other nonadmin user', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes'
+            })
+            .set('authorization', `Bearer ${u2token}`);
+
+        expect(resp.statusCode).toEqual(401);
+        expect(resp.body.error.message).toEqual('Must be admin or user who made the reservation.')
+    })
+    
+    it('badrequest if invalid data', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes',
+                startTime: 'notatimestamp',
+                endTime: '2022-03-04 09:15:00',
+                quantity: 2
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toEqual('Not a valid beginning timestamp')
+    })
+
+    it('badrequest if extra data', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes',
+                startTime: 'notatimestamp',
+                endTime: '2022-03-04 09:15:00',
+                quantity: 2,
+                userId: 5
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message[0]).toMatch('instance is not allowed to have the additional')
+    })
+
+    it('notfound if reservation not found', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/12341234`)
+            .send({
+                notes: 'newnotes'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(404);
+    })
+})
+
+describe('DELETE /reservations/:resvId', () => {
+    it('deleted reservatoin: admin', async () => {
+        const resp = await request(app)
+            .delete(`/reservations/${testResvIds[0]}`)
+            .set('authorization', `Bearer ${a1token}`);
+        
+        expect(resp.body).toEqual({
+            deleted: testResvIds[0]
+        })
+
+        await expect(async () => {
+            await Reservation.get(testResvIds[0]);
+        }).rejects.toThrow(NotFoundError);
+    })
+    
+    it('deleted reservatoin: admin, token via body', async () => {
+        const resp = await request(app)
+            .delete(`/reservations/${testResvIds[0]}`)
+            .send({
+                _token: a1token
+            });
+        
+        expect(resp.body).toEqual({
+            deleted: testResvIds[0]
+        })
+    })
+    
+    it('deleted reservatoin: correct user', async () => {
+        const resp = await request(app)
+            .delete(`/reservations/${testResvIds[0]}`)
+            .set('authorization', `Bearer ${u1token}`);
+
+        expect(resp.body).toEqual({
+            deleted: testResvIds[0]
+        })
+    })
+    
+    it('unauth if anon', async () => {
+        const resp = await request(app)
+            .delete(`/reservations/${testResvIds[0]}`);
+        
+        expect(resp.statusCode).toEqual(401);
+    })
+    
+    it('unauth if nonadmin other user', async () => {
+        const resp = await request(app)
+            .delete(`/reservations/${testResvIds[0]}`)
+            .set('authorization', `Bearer ${u2token}`);
+
+        expect(resp.statusCode).toEqual(401);
+    })
+
+    it('notfound if reservation not found', async () => {
+        const resp = await request(app)
+            .delete('/reservations/12341234')
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(404);
+    })
+})
 
 afterEach(async () => {
     await db.query('ROLLBACK');
