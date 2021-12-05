@@ -40,7 +40,7 @@ CREATE TABLE "reservations" (
     "instrument_id" INT NOT NULL
         REFERENCES instruments ON DELETE CASCADE,
     "quantity" INT NOT NULL CHECK (quantity >= 1),
-    "start_time" TIMESTAMP NOT NULL,
-    "end_time" TIMESTAMP NOT NULL,
+    "start_time" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "end_time" TIMESTAMP WITH TIME ZONE NOT NULL,
     "notes" TEXT NULL
 );

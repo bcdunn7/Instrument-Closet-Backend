@@ -3,6 +3,7 @@
 import db from '../db';
 import { BadRequestError, NotFoundError } from '../expressError';
 import Category from './category';
+import Reservation from './reservation';
 
 /** Instrument database model */
 class Instrument {
@@ -170,6 +171,58 @@ class Instrument {
             VALUES ($1, $2)`,
             [this.id, categoryId]);
     }
-}
+
+    /** Get reservations of this instrument. Optional timefram params.
+     * @async
+     * @param {datetime} startTime - optional startTime which will filter results to only those reservations which include time after startTime
+     * @param {datetime} endTime - optional endTime which will filter results to only those reservations which include time before endTime
+     * 
+     * @return {Promies<Array>} - promise when resolved bears array with reservations: [{id, userId, instrumentId, quantity, startTime, endTime, notes}, ...]
+     * 
+     * @throws {BadRequestError} - if start/end times are invalid 
+     */
+    async getReservations({ startTime, endTime } = {}) {
+        if (startTime && !(new Date(startTime)).getTime()>0) throw new BadRequestError('Not a valid beginning timestamp');
+        
+        if (endTime && !(new Date(endTime)).getTime()>0) throw new BadRequestError('Not a valid ending timestamp');
+
+        if (startTime && endTime && new Date(startTime) > new Date(endTime)) {
+            throw new BadRequestError('End time cannot be before start time.')
+        }
+
+        let query = `
+            SELECT r.id,
+                    r.user_id AS "userId",
+                    r.instrument_id AS "instrumentId",
+                    r.quantity,
+                    r.start_time AT TIME ZONE 'CST' AS "startTime",
+                    r.end_time AT TIME ZONE 'CST' AS "endTime",
+                    r.notes
+            FROM reservations r
+            WHERE r.instrument_id = $1 `
+
+        let whereExpressions = [];
+        let queryValues = [this.id];
+
+        if (startTime !== undefined) {
+            queryValues.push(startTime);
+            whereExpressions.push(`r.start_time > $${queryValues.length}`);
+        }
+
+        if (endTime !== undefined) {
+            queryValues.push(endTime);
+            whereExpressions.push(`r.end_time < $${queryValues.length}`);
+        }
+
+        if (whereExpressions.length > 0) {
+            query += "AND " + whereExpressions.join(" AND ")
+        }
+
+        const res = await db.query(query, queryValues);
+
+        const reservations = res.rows.map(r => new Reservation(r));
+        return reservations;
+    }
+} 
 
 export default Instrument;

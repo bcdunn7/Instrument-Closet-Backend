@@ -53,12 +53,17 @@ class Reservation {
         if (!checkUser.rows[0]) throw new NotFoundError(`No User with id: ${userId}`)
 
         const checkInst = await db.query(`
-            SELECT id
+            SELECT id, quantity
             FROM instruments
             WHERE id = $1`,
             [instrumentId]);
 
+            
         if (!checkInst.rows[0]) throw new NotFoundError(`No Instrument with id: ${instrumentId}`)
+            
+        // const instReservations = await Reservation.getallreservationsforinstrument()
+
+        // check if intended quantity is < than quantity - quantities of current reservations.
 
         const res = await db.query(`
             INSERT INTO reservations

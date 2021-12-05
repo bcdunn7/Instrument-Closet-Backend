@@ -89,8 +89,8 @@ beforeAll(async () => {
         userId: testUserIds[0],
         instrumentId: testInstIds[0],
         quantity: 1,
-        startTime: '2022-01-01 11:00:00',
-        endTime: '2022-01-01 13:00:00',
+        startTime: '2022-01-01 11:00:00 CST',
+        endTime: '2022-01-01 13:00:00 CST',
         notes: 'resv notes'
     });
 
