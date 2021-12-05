@@ -278,19 +278,20 @@ describe('GET /instruments', () => {
             instruments: instArr})
     })
     
-    it('returns list of instruments: anon', async () => {
+    it('unauth if anon', async () => {
         const resp = await request(app)
             .get('/instruments');
 
-        expect(resp.body).toEqual({
-            instruments: instArr})
+        expect(resp.statusCode).toEqual(401);
+        expect(resp.body.error.message).toEqual("Must be logged in.")
     })
 })
 
 describe('GET /instruments/:instId', () => {
-    it('returns instrument: anon', async () => {
+    it('returns instrument: user', async () => {
         const resp = await request(app)
-            .get(`/instruments/${testInstIds[0]}`);
+            .get(`/instruments/${testInstIds[0]}`)
+            .set('authorization', `Bearer ${u1token}`);
 
         expect(resp.body).toEqual({
             instrument: {
@@ -307,9 +308,18 @@ describe('GET /instruments/:instId', () => {
         })
     })
 
+    it('unauth if anon', async () => {
+        const resp = await request(app)
+            .get(`/instruments/${testInstIds[0]}`);
+
+        expect(resp.statusCode).toEqual(401);
+        expect(resp.body.error.message).toEqual("Must be logged in.")
+    })
+
     it('not found for no such instrument', async () => {
         const resp = await request(app)
-            .get('/instruments/12341234');
+            .get('/instruments/12341234')
+            .set('authorization', `Bearer ${u1token}`);
     
         expect(resp.statusCode).toEqual(404);
     })

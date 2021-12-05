@@ -172,10 +172,11 @@ class Instrument {
             [this.id, categoryId]);
     }
 
-    /** Get reservations of this instrument. Optional timefram params.
+    /** Get reservations of this instrument. Optional timeframe params.
      * @async
      * @param {datetime} startTime - optional startTime which will filter results to only those reservations which include time after startTime
      * @param {datetime} endTime - optional endTime which will filter results to only those reservations which include time before endTime
+     * ^ These params are full datetimes (2021-01-01 01:00:00 CST) but the date is the only think compared with these entries. In otherwords, these params only filter by days despite being date and time.
      * 
      * @return {Promies<Array>} - promise when resolved bears array with reservations: [{id, userId, instrumentId, quantity, startTime, endTime, notes}, ...]
      * 

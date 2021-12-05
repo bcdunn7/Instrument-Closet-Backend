@@ -1,7 +1,7 @@
 'use strict';
 
 import express from 'express';
-import { ensureAdmin } from '../middleware/authMiddleware';
+import { ensureAdmin, ensureLoggedIn } from '../middleware/authMiddleware';
 import Instrument from '../models/instrument';
 import jsonschema from 'jsonschema';
 import newInstrumentSchema from '../schemas/newInstrumentSchema.json';
@@ -42,9 +42,9 @@ router.post('/', ensureAdmin, async (req, res, next) => {
  * 
  * @return list of all instruments
  * 
- * AUTH: none
+ * AUTH: logged-in
 */
-router.get('/', async (req, res, next) => {
+router.get('/', ensureLoggedIn, async (req, res, next) => {
     try {
         const instruments = await Instrument.findAll();
         return res.json({ instruments })
@@ -58,9 +58,9 @@ router.get('/', async (req, res, next) => {
  * 
  * @return Instrument instance => {id, name, quantity, description, imageURL, categories: [{id, name}, ...]}
  * 
- * AUTH: none
+ * AUTH: logged-in
 */
-router.get('/:instId', async (req, res, next) => {
+router.get('/:instId', ensureLoggedIn, async (req, res, next) => {
     try {
         const instrument = await Instrument.get(req.params.instId);
         return res.json({ instrument })
