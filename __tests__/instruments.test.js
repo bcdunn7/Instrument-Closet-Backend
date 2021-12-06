@@ -12,12 +12,22 @@ const request = require('supertest');
 const u1token = createToken({ username: 'testuser1', isAdmin: false});
 const a1token = createToken({ username: 'testadmin1', isAdmin: true});
 
+const testUserIds = [];
 const testInstIds = [];
 const testCatIds = [];
 
 beforeAll(async () => {
+    await db.query('DELETE FROM users');
     await db.query('DELETE FROM instruments');
+    await db.query('DELETE FROM reservations');
     await db.query('DELETE FROM categories');
+
+    const resultsUsers = await db.query(`
+        INSERT INTO users (username, password, first_name, last_name, email, phone, is_admin)
+        VALUES ('user1', 'password', 'u1first', 'u1last', 'u1@email.com', '1115559999', false)
+        RETURNING id`);
+
+    testUserIds.splice(0, 0, ...resultsUsers.rows.map(u => u.id));
 
     const inst1 = await Instrument.create({
         name: 'inst1',
@@ -42,6 +52,15 @@ beforeAll(async () => {
     testCatIds.push(cat1.id);
 
     await inst1.addCategory(cat1.id);
+
+    await db.query(`
+        INSERT INTO reservations
+            (user_id, instrument_id, quantity, start_time, end_time, notes)
+        VALUES
+            ($1, $2, 1, 1641027600, 1641034800, 'somenotes'),
+            ($3, $4, 2, 1641117600, 1641121200, 'somenotes2')
+        RETURNING id`,
+        [testUserIds[0], testInstIds[1], testUserIds[0], testInstIds[1]]);
 })
 
 beforeEach(async () => {
@@ -497,6 +516,120 @@ describe('DELETE /instrumnets/:instId', () => {
             .set('authorization', `Bearer ${a1token}`);
 
         expect(resp.statusCode).toEqual(404); 
+    })
+})
+
+describe('GET /instruments/[instId]/reservations', () => {
+    it('returns reservations for inst', async () => {
+        const resp = await request(app)
+            .get(`/instruments/${testInstIds[1]}/reservations`)
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.body).toEqual({
+            reservations: [
+                {
+                    id: expect.any(Number),
+                    userId: testUserIds[0],
+                    instrumentId: testInstIds[1],
+                    quantity: 1,
+                    startTime: 1641027600,
+                    endTime: 1641034800,
+                    notes: 'somenotes'
+                },
+                {
+                    id: expect.any(Number),
+                    userId: testUserIds[0],
+                    instrumentId: testInstIds[1],
+                    quantity: 2,
+                    startTime: 1641117600,
+                    endTime: 1641121200,
+                    notes: 'somenotes2'
+                }
+            ]
+        })
+    })
+   
+    it('returns reservations for inst, with starttime parametrs', async () => {
+        const resp = await request(app)
+            .get(`/instruments/${testInstIds[1]}/reservations`)
+            .send({
+                startTime: '2022-01-01T11:00:00',
+                timeZone: 'America/Chicago'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.body).toEqual({
+            reservations: [
+                {
+                    id: expect.any(Number),
+                    userId: testUserIds[0],
+                    instrumentId: testInstIds[1],
+                    quantity: 2,
+                    startTime: 1641117600,
+                    endTime: 1641121200,
+                    notes: 'somenotes2'
+                }
+            ]
+        })
+    })
+    
+    it('returns reservations for inst, with endtime parametrs', async () => {
+        const resp = await request(app)
+            .get(`/instruments/${testInstIds[1]}/reservations`)
+            .send({
+                endTime: '2022-01-01T11:00:00',
+                timeZone: 'America/Chicago'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.body).toEqual({
+            reservations: [
+                {
+                    id: expect.any(Number),
+                    userId: testUserIds[0],
+                    instrumentId: testInstIds[1],
+                    quantity: 1,
+                    startTime: 1641027600,
+                    endTime: 1641034800,
+                    notes: 'somenotes'
+                }
+            ]
+        })
+    })
+    
+    it('badrequest for no timeZone if specifying start or end time', async () => {
+        const resp = await request(app)
+            .get(`/instruments/${testInstIds[1]}/reservations`)
+            .send({
+                endTime: '2022-01-01T11:00:00'            
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toEqual('An endTime was supplied, but no timeZone was specified. TimeZone must be included when trying to query by time.')
+    })
+    
+    it('badrequest for invalid data', async () => {
+        const resp = await request(app)
+            .get(`/instruments/${testInstIds[1]}/reservations`)
+            .send({
+                //no 'T'
+                endTime: '2022-01-01 11:00:00',
+                timeZone: 'America/Chicago'            
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toEqual('unparsable: the input \"2022-01-01 11:00:00\" can\'t be parsed as ISO 8601')
+    })
+    
+    it('unauth for anon', async () => {
+        const resp = await request(app)
+            .get(`/instruments/${testInstIds[1]}/reservations`);
+            
+
+        expect(resp.statusCode).toEqual(401);
+        expect(resp.body.error.message).toEqual('Must be logged in.')
     })
 })
 

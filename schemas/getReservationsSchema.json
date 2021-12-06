@@ -1,0 +1,27 @@
+{ "$id": "http://example.com/example.json",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "properties": {
+        "_token": {
+            "$id": "#/properties/_token",
+            "default": "",
+            "type": "string"
+        },
+        "startTime": {
+            "$id": "#/properties/startTime",
+            "default": "",
+            "type": "string"
+        },
+        "endTime": {
+            "$id": "#/properties/endTime",
+            "default": "",
+            "type": "string"
+        },
+        "timeZone": {
+            "$id": "#/properties/timeZone",
+            "default": "",
+            "type": "string"
+        }
+    },
+    "additionalProperties": false
+}

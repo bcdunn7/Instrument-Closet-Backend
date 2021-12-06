@@ -4,12 +4,22 @@ import Instrument from '../models/instrument';
 import db from '../db';
 import { BadRequestError, NotFoundError } from '../expressError';
 
+const testUserIds = [];
 const testInstIds = [];
 const testCatIds = [];
 
 beforeAll(async () => {
+    await db.query('DELETE FROM users');
     await db.query('DELETE FROM instruments');
+    await db.query('DELETE FROM reservations');
     await db.query('DELETE FROM categories');
+
+    const resultsUsers = await db.query(`
+        INSERT INTO users (username, password, first_name, last_name, email, phone, is_admin)
+        VALUES ('user1', 'password', 'u1first', 'u1last', 'u1@email.com', '1115559999', false)
+        RETURNING id`);
+
+    testUserIds.splice(0, 0, ...resultsUsers.rows.map(u => u.id));
 
     const resultsInsts = await db.query(`
         INSERT INTO instruments (name, quantity, description, image_url) 
@@ -33,6 +43,15 @@ beforeAll(async () => {
             (instrument_id, category_id)
         VALUES ($1, $2), ($3, $4)`,
         [testInstIds[2], testCatIds[0], testInstIds[2], testCatIds[1]])
+
+    await db.query(`
+        INSERT INTO reservations
+            (user_id, instrument_id, quantity, start_time, end_time, notes)
+        VALUES
+            ($1, $2, 1, 1641027600, 1641034800, 'somenotes'),
+            ($3, $4, 2, 1641117600, 1641121200, 'somenotes2')
+        RETURNING id`,
+        [testUserIds[0], testInstIds[2], testUserIds[0], testInstIds[2]]);
 })
 
 beforeEach(async () => {
@@ -354,6 +373,100 @@ describe('addCategory', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(NotFoundError);
             expect(e.message).toEqual('No Category with id: 9999');
+        }
+    })
+})
+
+describe('getReservations', () => {
+    it('gets reservatins for instrument', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+
+        const reservations = await inst.getReservations();
+
+        expect(reservations).toEqual([
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
+                quantity: 1,
+                startTime: 1641027600,
+                endTime: 1641034800,
+                notes: 'somenotes'
+            },
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
+                quantity: 2,
+                startTime: 1641117600,
+                endTime: 1641121200,
+                notes: 'somenotes2'
+            }
+        ])
+    })
+    
+    it('gets reservatins for instrument, filter by end', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+
+        const reservations = await inst.getReservations({ endTime: 1641085200});
+
+        expect(reservations).toEqual([
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
+                quantity: 1,
+                startTime: 1641027600,
+                endTime: 1641034800,
+                notes: 'somenotes'
+            }
+        ])
+    })
+
+    it('gets reservatins for instrument, filter by start', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+
+        const reservations = await inst.getReservations({ startTime: 1641085200 });
+
+        expect(reservations).toEqual([
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
+                quantity: 2,
+                startTime: 1641117600,
+                endTime: 1641121200,
+                notes: 'somenotes2'
+            }
+        ])
+    })
+    
+    it('gets reservatins for instrument, filter by both', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+
+        const reservations = await inst.getReservations({ startTime: 1641085200, endTime: 1641121201 });
+
+        expect(reservations).toEqual([
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
+                quantity: 2,
+                startTime: 1641117600,
+                endTime: 1641121200,
+                notes: 'somenotes2'
+            }
+        ])
+    })
+    
+    it('badrequest if endtime is earlier than starttime', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+        expect.assertions(2);
+        try {
+            await inst.getReservations({ startTime: 1641085200, endTime: 1541121201 });
+        } catch (e) {
+            expect(e).toBeInstanceOf(BadRequestError);
+            expect(e.message).toEqual('End time cannot be before start time.')
         }
     })
 })

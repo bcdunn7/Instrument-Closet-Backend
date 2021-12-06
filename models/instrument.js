@@ -174,20 +174,16 @@ class Instrument {
 
     /** Get reservations of this instrument. Optional timeframe params.
      * @async
-     * @param {datetime} startTime - optional startTime which will filter results to only those reservations which include time after startTime
-     * @param {datetime} endTime - optional endTime which will filter results to only those reservations which include time before endTime
-     * ^ These params are full datetimes (2021-01-01 01:00:00 CST) but the date is the only think compared with these entries. In otherwords, these params only filter by days despite being date and time.
+     * @param {int} startTime - optional startTime which will filter results to only those reservations which include time after startTime
+     * @param {int} endTime - optional endTime which will filter results to only those reservations which include time before endTime
+     * ^ These params are unix seconds times
      * 
      * @return {Promies<Array>} - promise when resolved bears array with reservations: [{id, userId, instrumentId, quantity, startTime, endTime, notes}, ...]
      * 
-     * @throws {BadRequestError} - if start/end times are invalid 
+     * @throws {BadRequestError} - if end time is before start time
      */
     async getReservations({ startTime, endTime } = {}) {
-        if (startTime && !(new Date(startTime)).getTime()>0) throw new BadRequestError('Not a valid beginning timestamp');
-        
-        if (endTime && !(new Date(endTime)).getTime()>0) throw new BadRequestError('Not a valid ending timestamp');
-
-        if (startTime && endTime && new Date(startTime) > new Date(endTime)) {
+        if (startTime && endTime && startTime > endTime) {
             throw new BadRequestError('End time cannot be before start time.')
         }
 
@@ -196,8 +192,8 @@ class Instrument {
                     r.user_id AS "userId",
                     r.instrument_id AS "instrumentId",
                     r.quantity,
-                    r.start_time AT TIME ZONE 'CST' AS "startTime",
-                    r.end_time AT TIME ZONE 'CST' AS "endTime",
+                    r.start_time AS "startTime",
+                    r.end_time AS "endTime",
                     r.notes
             FROM reservations r
             WHERE r.instrument_id = $1 `

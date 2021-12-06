@@ -6,7 +6,9 @@ import Instrument from '../models/instrument';
 import jsonschema from 'jsonschema';
 import newInstrumentSchema from '../schemas/newInstrumentSchema.json';
 import updateInstrumentSchema from '../schemas/updateInstrumentSchema.json';
+import getReservationsSchema from '../schemas/getReservationsSchema.json';
 import { BadRequestError } from '../expressError';
+import convertToUnix from '../helpers/time';
 
 const router = express.Router();
 
@@ -115,6 +117,53 @@ router.delete('/:instId', ensureAdmin, async (req, res, next) => {
         const instrument = await Instrument.get(req.params.instId);
         await instrument.remove();
         return res.json({ deleted: `${instrument.name} (ID: ${req.params.instId})`});
+    } catch (e) {
+        return next(e);
+    }
+})
+
+/** GET /instruments/[instId]/reservations 
+ * optional { startTime, endTime, timeZone }=> { reservations: [{id, userId, instrumentId, startTime, endTime, notes}, ...]} 
+ * 
+ * Times should be formated as an ISO 8601 date and time. Timezone is provided seperately.
+ *      YYYY-MM-DD'T'HH:MM:SS
+ *      2021-01-01T09:30:00
+ * 
+ * Timezone should be IANA format: 
+ *      "America/New_York"; 
+ *      "Asia/Tokyo"
+ * 
+ * If either startTime or endTime is included, a timeZone must be included. 
+ *
+ * @return => { reservations: [{id, userId, instrumentId, startTime, endTime, notes}, ...]}
+ * 
+ * AUTH: logged-in
+*/
+router.get('/:instId/reservations', ensureLoggedIn, async (req, res, next) => {
+    try {
+        const validator = jsonschema.validate(req.body, getReservationsSchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            console.log("ERRRORRRRR", errs);
+            throw new BadRequestError(errs);
+        };
+        
+        if (req.body.startTime && !req.body.timeZone) throw new BadRequestError("A startTime was supplied, but no timeZone was specified. TimeZone must be included when trying to query by time.");
+        
+        if (req.body.endTime && !req.body.timeZone) throw new BadRequestError("An endTime was supplied, but no timeZone was specified. TimeZone must be included when trying to query by time.");
+        
+        const unixStartTime = req.body.startTime && req.body.timeZone ? convertToUnix(req.body.startTime, req.body.timeZone) : null;
+        const unixEndTime = req.body.endTime && req.body.timeZone ? convertToUnix(req.body.endTime, req.body.timeZone) : null;
+        
+        const instrument = await Instrument.get(req.params.instId);
+
+        const queryParameters = {};
+        if (unixStartTime) queryParameters['startTime'] = unixStartTime;
+        if (unixEndTime) queryParameters['endTime'] = unixEndTime;
+        
+        const reservations = await instrument.getReservations(queryParameters);
+
+        return res.json({ reservations })
     } catch (e) {
         return next(e);
     }

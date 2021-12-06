@@ -104,7 +104,7 @@ router.get('/:resvId', ensureLoggedIn, async (req, res, next) => {
  * resvData can include:
  *      { quantity, startTime, endTime, timeZone, notes}
  * 
- * * Times should be formated as an ISO 8601 date and time. Timezone is provided seperately.
+ * Times should be formated as an ISO 8601 date and time. Timezone is provided seperately.
  *      YYYY-MM-DD'T'HH:MM:SS
  *      2021-01-01T09:30:00
  * 
@@ -124,7 +124,7 @@ router.patch('/:resvId', ensureLoggedIn, async (req, res, next) => {
         if (!validator.valid) {
             const errs = validator.errors.map(e => e.stack);
             throw new BadRequestError(errs);
-        }
+        };
 
         if (req.body.startTime && !req.body.timeZone) throw new BadRequestError("A startTime was supplied, but no timeZone was specified. TimeZone must be included when trying to adjust a time.");
         
