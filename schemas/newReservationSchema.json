@@ -6,6 +6,7 @@
         "instrumentId",
         "quantity",
         "startTime",
+        "timeZone",
         "endTime"
     ],
     "type": "object",
@@ -37,6 +38,11 @@
         },
         "endTime": {
             "$id": "#/properties/endTime",
+            "default": "",
+            "type": "string"
+        },
+        "timeZone": {
+            "$id": "#/properties/timeZone",
             "default": "",
             "type": "string"
         },

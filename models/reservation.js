@@ -2,6 +2,7 @@
 
 import db from '../db';
 import { BadRequestError, NotFoundError } from '../expressError';
+import { DateTime } from 'luxon';
 
 /** Reservation database model */
 class Reservation {
@@ -25,20 +26,16 @@ class Reservation {
      *      {int} userId
      *      {int} instrumentId
      *      {int} quantity
-     *      {datetime} startTime
-     *      {datetime} endTime
+     *      {int} startTime (unix)
+     *      {int} endTime (unix)
      *      {string} notes
      * 
      * @return {Promise<Reservation>} - promise when resolved bears reservation {id, userId, instrumentId, quantity, startTime, endTime, notes}
-     * @throws {BadRequestError} if quantity is a negative or non-integer number; if times are not formatted as such; if endTime is before startTime
+     * @throws {BadRequestError} if quantity is a negative or non-integer number; if endTime is before startTime
      * @throws {NotFoundError} if user of instrument not found
      */
     static async create({ userId, instrumentId, quantity, startTime, endTime, notes }) {
-        if (!(new Date(startTime)).getTime()>0) throw new BadRequestError('Not a valid beginning timestamp');
-        
-        if (!(new Date(endTime)).getTime()>0) throw new BadRequestError('Not a valid ending timestamp');
-
-        if (new Date(startTime) > new Date(endTime)) {
+        if (startTime > endTime) {
             throw new BadRequestError('End time cannot be before start time.')
         }
 
@@ -130,11 +127,7 @@ class Reservation {
      * resv.save();
      */
     async save() {
-        if (!(new Date(this.startTime)).getTime()>0) throw new BadRequestError('Not a valid beginning timestamp');
-        
-        if (!(new Date(this.endTime)).getTime()>0) throw new BadRequestError('Not a valid ending timestamp');
-
-        if (new Date(this.startTime) > new Date(this.endTime)) {
+        if (this.startTime > this.endTime) {
             throw new BadRequestError('End time cannot be before start time.')
         }
 

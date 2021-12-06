@@ -89,8 +89,8 @@ beforeAll(async () => {
         userId: testUserIds[0],
         instrumentId: testInstIds[0],
         quantity: 1,
-        startTime: '2022-01-01 11:00:00 CST',
-        endTime: '2022-01-01 13:00:00 CST',
+        startTime: 1641027600,
+        endTime: 1641034800,
         notes: 'resv notes'
     });
 
@@ -109,8 +109,9 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T11:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${a1token}`);
@@ -121,8 +122,8 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01T17:00:00.000Z',
-                endTime: '2022-01-01T19:00:00.000Z',
+                startTime: 1641056400,
+                endTime: 1641063600,
                 notes: 'resv notes'
             }
         })
@@ -136,8 +137,9 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T11:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             });
             
@@ -147,8 +149,8 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01T17:00:00.000Z',
-                endTime: '2022-01-01T19:00:00.000Z',
+                startTime: 1641056400,
+                endTime: 1641063600,
                 notes: 'resv notes'
             }
         })
@@ -161,8 +163,9 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T11:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${u1token}`);
@@ -173,8 +176,8 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01T17:00:00.000Z',
-                endTime: '2022-01-01T19:00:00.000Z',
+                startTime: 1641056400,
+                endTime: 1641063600,
                 notes: 'resv notes'
             }
         })    
@@ -187,8 +190,9 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T11:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${u2token}`);
@@ -204,8 +208,9 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T11:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZome: 'America/Chicago',
                 notes: 'resv notes'
             })
             
@@ -220,7 +225,7 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                endTime: '2022-01-01 13:00:00',
+                endTime: '2022-01-01T13:00:00',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${a1token}`);
@@ -235,8 +240,9 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 0,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T11:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${a1token}`);
@@ -253,13 +259,14 @@ describe('POST /reservations', () => {
                 instrumentId: testInstIds[0],
                 quantity: 1,
                 startTime: 'not a datetime',
-                endTime: '2022-01-01 13:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${a1token}`);
             
         expect(resp.statusCode).toEqual(400);
-        expect(resp.body.error.message).toEqual('Not a valid beginning timestamp');
+        expect(resp.body.error.message).toEqual('unparsable: the input \"not a datetime\" can\'t be parsed as ISO 8601');
     })
     
     it('badrequet if invalid data: endTime', async () => {
@@ -270,13 +277,32 @@ describe('POST /reservations', () => {
                 instrumentId: testInstIds[0],
                 quantity: 1,
                 endTime: 'not a datetime',
-                startTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${a1token}`);
             
         expect(resp.statusCode).toEqual(400);
-        expect(resp.body.error.message).toEqual('Not a valid ending timestamp');
+        expect(resp.body.error.message).toEqual('unparsable: the input \"not a datetime\" can\'t be parsed as ISO 8601');
+    })
+    
+    it('badrequet if invalid data: timeZone', async () => {
+        const resp = await request(app)
+            .post('/reservations')
+            .send({
+                userId: testUserIds[0],
+                instrumentId: testInstIds[0],
+                quantity: 1,
+                endTime: 'not a datetime',
+                startTime: '2022-01-01T13:00:00',
+                timeZone: 'America/wrong',
+                notes: 'resv notes'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+            
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toEqual('unsupported zone: the zone \"America/wrong\" is not supported');
     })
     
     it('badrequet if invalid data: endTime before startTime', async () => {
@@ -286,8 +312,9 @@ describe('POST /reservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 13:00:00',
-                endTime: '2022-01-01 11:00:00',
+                startTime: '2022-01-01T13:00:00',
+                endTime: '2022-01-01T11:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${a1token}`);
@@ -310,8 +337,8 @@ describe('GET /reservations', () => {
                     userId: testUserIds[0],
                     instrumentId: testInstIds[0],
                     quantity: 1,
-                    startTime: '2022-01-01T17:00:00.000Z',
-                    endTime: '2022-01-01T19:00:00.000Z',
+                    startTime: expect.any(Number),
+                    endTime: expect.any(Number),
                     notes: 'resv notes'
                 }
             ]
@@ -327,8 +354,9 @@ describe('GET /reservations/:resvId', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 13:00:00',
+                startTime: '2022-01-01T11:00:00',
+                endTime: '2022-01-01T13:00:00',
+                timeZone: 'America/Chicago',
                 notes: 'resv notes'
             })
             .set('authorization', `Bearer ${a1token}`);
@@ -343,8 +371,8 @@ describe('GET /reservations/:resvId', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: "2022-01-01T17:00:00.000Z",
-                endTime: "2022-01-01T19:00:00.000Z",
+                startTime: expect.any(Number),
+                endTime: expect.any(Number),
                 notes: "resv notes",
             }
         })
@@ -375,8 +403,8 @@ describe('PATCH /reservations/:resvId', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01T17:00:00.000Z',
-                endTime: '2022-01-01T19:00:00.000Z',
+                startTime: expect.any(Number),
+                endTime: expect.any(Number),
                 notes: 'newnotes'
             }
         })
@@ -400,8 +428,8 @@ describe('PATCH /reservations/:resvId', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01T17:00:00.000Z',
-                endTime: '2022-01-01T19:00:00.000Z',
+                startTime: expect.any(Number),
+                endTime: expect.any(Number),
                 notes: 'newnotes'
             }
         })
@@ -421,8 +449,8 @@ describe('PATCH /reservations/:resvId', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01T17:00:00.000Z',
-                endTime: '2022-01-01T19:00:00.000Z',
+                startTime: expect.any(Number),
+                endTime: expect.any(Number),
                 notes: 'newnotes'
             }
         })
@@ -433,8 +461,9 @@ describe('PATCH /reservations/:resvId', () => {
             .patch(`/reservations/${testResvIds[0]}`)
             .send({
                 notes: 'newnotes',
-                startTime: '2022-01-05 01:30:00',
-                endTime: '2022-03-04 09:15:00',
+                startTime: '2022-01-05T01:30:00',
+                endTime: '2022-03-04T09:15:00',
+                timeZone: 'America/Chicago',
                 quantity: 2
             })
             .set('authorization', `Bearer ${u1token}`);
@@ -445,8 +474,8 @@ describe('PATCH /reservations/:resvId', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 2,
-                startTime: '2022-01-05T07:30:00.000Z',
-                endTime: '2022-03-04T15:15:00.000Z',
+                startTime: 1641367800,
+                endTime: 1646406900,
                 notes: 'newnotes'
             }
         })
@@ -475,6 +504,35 @@ describe('PATCH /reservations/:resvId', () => {
         expect(resp.body.error.message).toEqual('Must be admin or user who made the reservation.')
     })
     
+    it('badrequest if invalid data: missing timeZone', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes',
+                endTime: '2022-03-04T09:15:00',
+                quantity: 2
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toEqual('An endTime was supplied, but no timeZone was specified. TimeZone must be included when trying to adjust a time.')
+    })
+   
+    it('badrequest if invalid data: wrong timeZone', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                notes: 'newnotes',
+                endTime: '2022-03-04T09:15:00',
+                timeZone: 'America/wrong',
+                quantity: 2
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toEqual("unsupported zone: the zone \"America/wrong\" is not supported")
+    })
+    
     it('badrequest if invalid data', async () => {
         const resp = await request(app)
             .patch(`/reservations/${testResvIds[0]}`)
@@ -482,12 +540,13 @@ describe('PATCH /reservations/:resvId', () => {
                 notes: 'newnotes',
                 startTime: 'notatimestamp',
                 endTime: '2022-03-04 09:15:00',
+                timeZone: 'America/Chicago',
                 quantity: 2
             })
             .set('authorization', `Bearer ${a1token}`);
 
         expect(resp.statusCode).toEqual(400);
-        expect(resp.body.error.message).toEqual('Not a valid beginning timestamp')
+        expect(resp.body.error.message).toEqual('unparsable: the input \"notatimestamp\" can\'t be parsed as ISO 8601')
     })
 
     it('badrequest if extra data', async () => {
@@ -495,8 +554,6 @@ describe('PATCH /reservations/:resvId', () => {
             .patch(`/reservations/${testResvIds[0]}`)
             .send({
                 notes: 'newnotes',
-                startTime: 'notatimestamp',
-                endTime: '2022-03-04 09:15:00',
                 quantity: 2,
                 userId: 5
             })
@@ -504,6 +561,20 @@ describe('PATCH /reservations/:resvId', () => {
 
         expect(resp.statusCode).toEqual(400);
         expect(resp.body.error.message[0]).toMatch('instance is not allowed to have the additional')
+    })
+    
+    it('badrequest if changing times so start is after end', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                // start is set at 2022-01-01T03:00:00
+                endTime: '2022-01-01T01:00:00',
+                timeZone: 'America/Chicago'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toMatch('End time cannot be before start time.')
     })
 
     it('notfound if reservation not found', async () => {

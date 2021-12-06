@@ -33,14 +33,13 @@ beforeAll(async () => {
         INSERT INTO reservations
             (user_id, instrument_id, quantity, start_time, end_time, notes)
         VALUES
-            ($1, $2, 1, '2022-01-01 11:00:00', '2022-01-02 13:00:00', 'somenotes'),
-            ($3, $4, 2, '2023-01-01 11:00:00', '2023-01-02 13:00:00', 'somenotes2')
+            ($1, $2, 1, 1641027600, 1641034800, 'somenotes'),
+            ($3, $4, 2, 1641117600, 1641121200, 'somenotes2')
         RETURNING id`,
         [testUserIds[0], testInstIds[0], testUserIds[0], testInstIds[2]]);
 
     testResvIds.splice(0, 0, ...resultsResvs.rows.map(r => r.id));
 })
-
 
 beforeEach(async () => {
     await db.query('BEGIN');
@@ -52,21 +51,18 @@ describe('create', () => {
             userId: testUserIds[0],
             instrumentId: testInstIds[0],
             quantity: 1,
-            startTime: '2022-01-01 10:00:00',
-            endTime: '2022-01-02 11:00:00',
+            startTime: 1641114000,
+            endTime: 1641121200,
             notes: 'reservation notes'
         });
-
-        const startExpected = new Date('2022-01-01T16:00:00.000z');
-        const endExpected = new Date('2022-01-02T17:00:00.000z');
 
         expect(reserv).toEqual({
             id: expect.any(Number),
             userId: testUserIds[0],
             instrumentId: testInstIds[0],
             quantity: 1,
-            startTime: startExpected,
-            endTime: endExpected,
+            startTime: 1641114000,
+            endTime: 1641121200,
             notes: 'reservation notes'
         })
     })
@@ -77,8 +73,8 @@ describe('create', () => {
                 userId: 9999,
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-01 10:00:00',
-                endTime: '2022-01-02 10:00:00',
+                startTime: 1641114000,
+                endTime: 1641121200,
                 notes: 'reservation notes'
             })
         }).rejects.toThrow('No User with id: 9999')
@@ -90,37 +86,11 @@ describe('create', () => {
                 userId: testUserIds[0],
                 instrumentId: 9999,
                 quantity: 1,
-                startTime: '2022-01-01 10:00:00',
-                endTime: '2022-01-02 10:00:00',
+                startTime: 1641114000,
+                endTime: 1641121200,
                 notes: 'reservation notes'
             })
         }).rejects.toThrow('No Instrument with id: 9999')
-    })
-
-    it('throws badrequest if startdate is invalid', async () => {
-        await expect(async () => {            
-            await Reservation.create({
-                userId: testUserIds[0],
-                instrumentId: testInstIds[0],
-                quantity: 1,
-                startTime: 'notatimestamp',
-                endTime: '2022-01-01 10:00:00',
-                notes: 'reservation notes'
-            })
-        }).rejects.toThrow('Not a valid beginning timestamp')
-    })
-
-    it('throws badrequest if enddate is invalid', async () => {
-        await expect(async () => {            
-            await Reservation.create({
-                userId: testUserIds[0],
-                instrumentId: testInstIds[0],
-                quantity: 1,
-                startTime: '2022-01-01 10:00:00',
-                endTime: 'notatimestamp',
-                notes: 'reservation notes'
-            })
-        }).rejects.toThrow('Not a valid ending timestamp')
     })
 
     it('throws badrequest if end is before start: date', async () => {
@@ -129,21 +99,8 @@ describe('create', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: '2022-01-02 11:00:00',
-                endTime: '2022-01-01 10:00:00',
-                notes: 'reservation notes'
-            })
-        }).rejects.toThrow(BadRequestError)
-    })
-
-    it('throws badrequest if end is before start: time', async () => {
-        await expect(async () => {            
-            await Reservation.create({
-                userId: testUserIds[0],
-                instrumentId: testInstIds[0],
-                quantity: 1,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-01 10:00:00',
+                startTime: 1641121200,
+                endTime: 141114000,
                 notes: 'reservation notes'
             })
         }).rejects.toThrow(BadRequestError)
@@ -155,8 +112,8 @@ describe('create', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: -2,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-03 10:00:00',
+                startTime: 1641114000,
+                endTime: 1641121200,
                 notes: 'reservation notes'
             })
         }).rejects.toThrow('Quantity must be a positive integer.')
@@ -168,8 +125,8 @@ describe('create', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 0,
-                startTime: '2022-01-01 11:00:00',
-                endTime: '2022-01-03 10:00:00',
+                startTime: 1641114000,
+                endTime: 1641121200,
                 notes: 'reservation notes'
             })
         }).rejects.toThrow('Quantity must be a positive integer.')
@@ -186,8 +143,8 @@ describe('findAll', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[0],
                 quantity: 1,
-                startTime: expect.any(Date),
-                endTime: expect.any(Date),
+                startTime: expect.any(Number),
+                endTime: expect.any(Number),
                 notes: 'somenotes'
             },
             {
@@ -195,8 +152,8 @@ describe('findAll', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[2],
                 quantity: 2,
-                startTime: expect.any(Date),
-                endTime: expect.any(Date),
+                startTime: expect.any(Number),
+                endTime: expect.any(Number),
                 notes: 'somenotes2'
             }
         ])
@@ -214,8 +171,8 @@ describe('get', () => {
             userId: testUserIds[0],
             instrumentId: testInstIds[0],
             quantity: 1,
-            startTime: expect.any(Date),
-            endTime: expect.any(Date),
+            startTime: expect.any(Number),
+            endTime: expect.any(Number),
             notes: 'somenotes'
         })
     })
@@ -249,8 +206,8 @@ describe('save', () => {
             userId: testUserIds[0],
             instrumentId: testInstIds[0],
             quantity: 2,
-            startTime: expect.any(Date),
-            endTime: expect.any(Date),
+            startTime: expect.any(Number),
+            endTime: expect.any(Number),
             notes: 'newnoteshere!'
         })
 
@@ -269,38 +226,18 @@ describe('save', () => {
             userId: testUserIds[0],
             instrumentId: testInstIds[0],
             quantity: 1,
-            startTime: expect.any(Date),
-            endTime: expect.any(Date),
+            startTime: expect.any(Number),
+            endTime: expect.any(Number),
             notes: 'somenotes'
         })
 
         expect(resvCheck).toBeInstanceOf(Reservation);
     })
-
-    it('throws badrequest if startDate is invalid', async () => {
-        const resv = await Reservation.get(testResvIds[0]);
-
-        resv.startTime = 'not a valid timestamp';
-
-        await expect(async () => {
-            await resv.save();
-        }).rejects.toThrow('Not a valid beginning timestamp')
-    })
-
-    it('throws badrequest if enddate is invalid', async () => {
-        const resv = await Reservation.get(testResvIds[0]);
-
-        resv.endTime = 'not a valid timestamp';
-
-        await expect(async () => {
-            await resv.save();
-        }).rejects.toThrow('Not a valid ending timestamp')
-    })
     
     it('throws badrequest if end is before start', async () => {
         const resv = await Reservation.get(testResvIds[0]);
 
-        resv.endTime = '2022-01-01 09:00:00';
+        resv.endTime = 1241114000;
 
         await expect(async () => {
             await resv.save();
