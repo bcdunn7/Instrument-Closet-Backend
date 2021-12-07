@@ -377,6 +377,20 @@ describe('addCategory', () => {
     })
 })
 
+describe('removeCategory', () => {
+    it('removes category', async () => {
+        const inst = await Instrument.get(testInstIds[0]);
+        await inst.addCategory(testCatIds[0]);
+
+        await inst.removeCategory(testCatIds[0]);
+
+        const instCheck = await Instrument.get(testInstIds[0]);
+
+        expect(instCheck.categories).toEqual([]);
+    })
+})
+
+
 describe('getReservations', () => {
     it('gets reservatins for instrument', async () => {
         const inst = await Instrument.get(testInstIds[2]);

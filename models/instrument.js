@@ -172,6 +172,17 @@ class Instrument {
             [this.id, categoryId]);
     }
 
+    /** Remove category from instrument: deletes database entry in the instrument_category table
+     * @async
+     * @param {int} categoryId
+     */
+    async removeCategory(categoryId) {
+        await db.query(`
+            DELETE FROM instrument_category
+            WHERE instrument_id = $1 AND category_id = $2`,
+            [this.id, categoryId]);
+    }
+
     /** Get reservations of this instrument. Optional timeframe params.
      * @async
      * @param {int} startTime - optional startTime which will filter results to only those reservations which include time after startTime
