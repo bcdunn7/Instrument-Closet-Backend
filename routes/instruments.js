@@ -7,6 +7,7 @@ import jsonschema from 'jsonschema';
 import newInstrumentSchema from '../schemas/newInstrumentSchema.json';
 import updateInstrumentSchema from '../schemas/updateInstrumentSchema.json';
 import getReservationsSchema from '../schemas/getReservationsSchema.json';
+import toggleCategorySchema from '../schemas/toggleCategorySchema.json';
 import { BadRequestError } from '../expressError';
 import convertToUnix from '../helpers/time';
 
@@ -144,7 +145,6 @@ router.get('/:instId/reservations', ensureLoggedIn, async (req, res, next) => {
         const validator = jsonschema.validate(req.body, getReservationsSchema);
         if (!validator.valid) {
             const errs = validator.errors.map(e => e.stack);
-            console.log("ERRRORRRRR", errs);
             throw new BadRequestError(errs);
         };
         
@@ -164,6 +164,54 @@ router.get('/:instId/reservations', ensureLoggedIn, async (req, res, next) => {
         const reservations = await instrument.getReservations(queryParameters);
 
         return res.json({ reservations })
+    } catch (e) {
+        return next(e);
+    }
+})
+
+/** POST /instruments/[instId]/categories { categoryId } => { Added: 'category ([categoryId]) added to instrument ([instId])'}
+ * 
+ * @return message confirming addition
+ * 
+ * AUTH: admin 
+ */
+router.post('/:instId/categories', ensureAdmin, async (req, res, next) => {
+    try {
+        const validator = jsonschema.validate(req.body, toggleCategorySchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        };
+
+        const instrument = await Instrument.get(req.params.instId);
+
+        await instrument.addCategory(req.body.categoryId);
+
+        return res.json({ Added: `Category (${req.body.categoryId}) added to instrument (${req.params.instId})`})
+    } catch (e) {
+        return next(e);
+    }
+})
+
+/** DELETE /instruments/[instId]/categories { categoryId }=> { Deleted: 'category ([categoryId]) removed from instrument ([instId])'}
+ * 
+ * @return message confirming deletion
+ * 
+ * AUTH: admin 
+ */
+router.delete('/:instId/categories', ensureAdmin, async (req, res, next) => {
+    try {
+        const validator = jsonschema.validate(req.body, toggleCategorySchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        };
+
+        const instrument = await Instrument.get(req.params.instId);
+
+        await instrument.removeCategory(req.body.categoryId);
+
+        return res.json({ Deleted: `Category (${req.body.categoryId}) removed from instrument (${req.params.instId})`})
     } catch (e) {
         return next(e);
     }

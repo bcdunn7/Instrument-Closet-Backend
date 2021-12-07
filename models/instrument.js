@@ -155,6 +155,7 @@ class Instrument {
      * @param {int} categoryId
      * 
      * @throws {NotFoundError} if category with id not found
+     * @throws {BadRequestError} if category already added to instrument
      */
     async addCategory(categoryId) {
         const checkForCategory = await db.query(`
@@ -164,6 +165,14 @@ class Instrument {
             [categoryId]);
 
         if(!checkForCategory.rows[0]) throw new NotFoundError(`No Category with id: ${categoryId}`);
+
+        const checkAlreadyAdded = await db.query(`
+            SELECT instrument_id
+            FROM instrument_category
+            WHERE instrument_id = $1 AND category_id = $2`,
+            [this.id, categoryId]);
+        
+        if (checkAlreadyAdded.rows[0]) throw new BadRequestError('Category already added to this instrument.')
 
         await db.query(`
             INSERT INTO instrument_category

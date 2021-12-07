@@ -633,6 +633,90 @@ describe('GET /instruments/[instId]/reservations', () => {
     })
 })
 
+describe('POST /instruments/:instId/categories', () => {
+    it('adds category to instrument: admin', async () => {
+        const resp = await request(app)
+            .post(`/instruments/${testInstIds[1]}/categories`)
+            .send({
+                categoryId: testCatIds[0]
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.body).toEqual({
+            Added: `Category (${testCatIds[0]}) added to instrument (${testInstIds[1]})`
+        })
+    })
+   
+    it('unauth for nonadmin user', async () => {
+        const resp = await request(app)
+            .post(`/instruments/${testInstIds[1]}/categories`)
+            .send({
+                categoryId: testCatIds[0]
+            })
+            .set('authorization', `Bearer ${u1token}`);
+
+        expect(resp.statusCode).toEqual(401);
+    })
+    
+    it('unauth for anon', async () => {
+        const resp = await request(app)
+            .post(`/instruments/${testInstIds[1]}/categories`)
+            .send({
+                categoryId: testCatIds[0]
+            });
+
+        expect(resp.statusCode).toEqual(401);
+    })
+    
+    it('badrequest for category already added', async () => {
+        const resp = await request(app)
+            .post(`/instruments/${testInstIds[0]}/categories`)
+            .send({
+                categoryId: testCatIds[0]
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toEqual('Category already added to this instrument.');
+    })
+})
+
+describe('DELETE /instruments/:instId/categories', () => {
+    it('removes category from instrument: admin', async () => {
+        const resp = await request(app)
+            .delete(`/instruments/${testInstIds[0]}/categories`)
+            .send({
+                categoryId: testCatIds[0]
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.body).toEqual({
+            Deleted: `Category (${testCatIds[0]}) removed from instrument (${testInstIds[0]})`
+        })
+    })
+   
+    it('unauth for nonadmin user', async () => {
+        const resp = await request(app)
+            .delete(`/instruments/${testInstIds[0]}/categories`)
+            .send({
+                categoryId: testCatIds[0]
+            })
+            .set('authorization', `Bearer ${u1token}`);
+
+        expect(resp.statusCode).toEqual(401);
+    })
+    
+    it('unauth for anon', async () => {
+        const resp = await request(app)
+            .delete(`/instruments/${testInstIds[0]}/categories`)
+            .send({
+                categoryId: testCatIds[0]
+            });
+
+        expect(resp.statusCode).toEqual(401);
+    })
+})
+
 afterEach(async () => {
     await db.query('ROLLBACK');
 })
