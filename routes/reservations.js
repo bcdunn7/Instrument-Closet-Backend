@@ -3,6 +3,7 @@
 import express from 'express';
 import { ensureLoggedIn } from '../middleware/authMiddleware';
 import Reservation from '../models/reservation';
+import Instrument from '../models/instrument';
 import User from '../models/user';
 import jsonschema from 'jsonschema';
 import newReservationSchema from '../schemas/newReservationSchema.json';
@@ -51,6 +52,18 @@ router.post('/', ensureLoggedIn, async (req, res, next) => {
         const user = await User.get(res.locals.user.username);
 
         if (!(res.locals.user && (res.locals.user.isAdmin || user.id === req.body.userId))) throw new UnauthorizedError("Must be admin or user trying to make a reservation.");
+
+        const inst = await Instrument.get(req.body.instrumentId);
+        const instResvs = await inst.getReservations({
+            startTime: unixStartTime,
+            endTime: unixEndTime
+        });
+        const currReserved = instResvs.reduce((sum, next) => {
+            return sum += next.quantity
+        }, 0);
+        const available = inst.quantity - currReserved;
+        
+        if (req.body.quantity > available) throw new BadRequestError(`Quantity requested exceeds quantity available at intended reservation time. (Requested: ${req.body.quantity}. Quantity available at reservation time: ${available}).`);
 
         const reservation = await Reservation.create({
             userId: req.body.userId,
@@ -137,6 +150,20 @@ router.patch('/:resvId', ensureLoggedIn, async (req, res, next) => {
         const currUser = await User.get(res.locals.user.username);
         
         if (!(res.locals.user && (res.locals.user.isAdmin || currUser.id === reservation.userId))) throw new UnauthorizedError('Must be admin or user who made the reservation.');
+
+        if (req.body.quantity) {
+            const inst = await Instrument.get(reservation.instrumentId);
+            const instResvs = await inst.getReservations({
+                startTime: unixStartTime,
+                endTime: unixEndTime
+            });
+            const currReserved = instResvs.reduce((sum, next) => {
+                return sum += next.quantity
+            }, 0);
+            const available = inst.quantity - currReserved;
+            
+            if (req.body.quantity > available) throw new BadRequestError(`Quantity requested exceeds quantity available at intended reservation time. (Requested: ${req.body.quantity}. Quantity available at reservation time: ${available}).`);
+        }
         
         const { quantity, notes } = req.body;
         if (quantity) reservation.quantity = quantity;

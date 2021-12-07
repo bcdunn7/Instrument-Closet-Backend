@@ -408,7 +408,7 @@ describe('getReservations', () => {
     it('gets reservatins for instrument, filter by end', async () => {
         const inst = await Instrument.get(testInstIds[2]);
 
-        const reservations = await inst.getReservations({ endTime: 1641085200});
+        const reservations = await inst.getReservations({ endTime: 1641031200});
 
         expect(reservations).toEqual([
             {
@@ -416,11 +416,40 @@ describe('getReservations', () => {
                 userId: testUserIds[0],
                 instrumentId: testInstIds[2],
                 quantity: 1,
-                startTime: 1641027600,
+                startTime: 1641027600, 
                 endTime: 1641034800,
                 notes: 'somenotes'
             }
         ])
+        expect(reservations.length).toEqual(1);
+    })
+    
+    it('gets reservatins for instrument, filter by end', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+
+        const reservations = await inst.getReservations({ endTime: 1641131200});
+
+        expect(reservations).toEqual([
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
+                quantity: 1,
+                startTime: 1641027600, 
+                endTime: 1641034800,
+                notes: 'somenotes'
+            },
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
+                quantity: 2,
+                startTime: 1641117600, 
+                endTime: 1641121200,
+                notes: 'somenotes2'
+            }
+        ])
+        expect(reservations.length).toEqual(2);
     })
 
     it('gets reservatins for instrument, filter by start', async () => {
@@ -441,22 +470,47 @@ describe('getReservations', () => {
         ])
     })
     
+    it('gets reservatins for instrument, filter by start', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+
+        const reservations = await inst.getReservations({ startTime: 1641185200 });
+
+        expect(reservations).toEqual([])
+    })
+    
     it('gets reservatins for instrument, filter by both', async () => {
         const inst = await Instrument.get(testInstIds[2]);
 
-        const reservations = await inst.getReservations({ startTime: 1641085200, endTime: 1641121201 });
+        const reservations = await inst.getReservations({ startTime: 1641029200, endTime: 1641118090 });
 
         expect(reservations).toEqual([
             {
                 id: expect.any(Number),
                 userId: testUserIds[0],
                 instrumentId: testInstIds[2],
+                quantity: 1,
+                startTime: 1641027600, 
+                endTime: 1641034800,
+                notes: 'somenotes'
+            },
+            {
+                id: expect.any(Number),
+                userId: testUserIds[0],
+                instrumentId: testInstIds[2],
                 quantity: 2,
-                startTime: 1641117600,
+                startTime: 1641117600, 
                 endTime: 1641121200,
                 notes: 'somenotes2'
             }
         ])
+    })
+    
+    it('gets reservatins for instrument, filter by both', async () => {
+        const inst = await Instrument.get(testInstIds[2]);
+
+        const reservations = await inst.getReservations({ startTime: 1641109200, endTime: 1641112090 });
+
+        expect(reservations).toEqual([])
     })
     
     it('badrequest if endtime is earlier than starttime', async () => {

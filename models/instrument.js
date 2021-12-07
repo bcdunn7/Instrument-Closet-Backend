@@ -201,14 +201,14 @@ class Instrument {
         let whereExpressions = [];
         let queryValues = [this.id];
 
-        if (startTime !== undefined) {
-            queryValues.push(startTime);
-            whereExpressions.push(`r.start_time > $${queryValues.length}`);
-        }
-
         if (endTime !== undefined) {
             queryValues.push(endTime);
-            whereExpressions.push(`r.end_time < $${queryValues.length}`);
+            whereExpressions.push(`r.start_time < $${queryValues.length}`);
+        }
+
+        if (startTime !== undefined) {
+            queryValues.push(startTime);
+            whereExpressions.push(`r.end_time > $${queryValues.length}`);
         }
 
         if (whereExpressions.length > 0) {

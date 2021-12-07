@@ -63,7 +63,7 @@ beforeAll(async () => {
 
     const inst1 = await Instrument.create({
         name: 'inst1',
-        quantity: 1,
+        quantity: 10,
         description: 'desc of inst1',
         imageURL: 'inst1.png'
     })
@@ -322,6 +322,49 @@ describe('POST /reservations', () => {
         expect(resp.statusCode).toEqual(400);
         expect(resp.body.error.message).toEqual('End time cannot be before start time.');
     })
+
+    it('badrequest if not enough quantity available at target time', async () => {
+        await Reservation.create({
+            userId: testUserIds[2],
+            instrumentId: testInstIds[0],
+            quantity: 3,
+            startTime: 1641027600,
+            endTime: 1641078000,
+            notes: 'resv notes'
+        });
+
+        const resp = await request(app)
+            .post('/reservations')
+            .send({
+                userId: testUserIds[0],
+                instrumentId: testInstIds[0],
+                quantity: 8,
+                startTime: '2022-01-01T03:00:00',
+                endTime: '2022-01-01T04:00:00',
+                timeZone: 'America/Chicago',
+                notes: 'resv notes'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+            
+        expect(resp.body.error.message).toEqual("Quantity requested exceeds quantity available at intended reservation time. (Requested: 8. Quantity available at reservation time: 6).")
+    })
+    
+    it('badrequest if not enough quantity available in general', async () => {
+        const resp = await request(app)
+            .post('/reservations')
+            .send({
+                userId: testUserIds[0],
+                instrumentId: testInstIds[0],
+                quantity: 80,
+                startTime: '2022-01-01T03:00:00',
+                endTime: '2022-01-01T04:00:00',
+                timeZone: 'America/Chicago',
+                notes: 'resv notes'
+            })
+            .set('authorization', `Bearer ${a1token}`);
+            
+        expect(resp.body.error.message).toEqual("Quantity requested exceeds quantity available at intended reservation time. (Requested: 80. Quantity available at reservation time: 9).")
+    })
 })
 
 describe('GET /reservations', () => {
@@ -575,6 +618,33 @@ describe('PATCH /reservations/:resvId', () => {
 
         expect(resp.statusCode).toEqual(400);
         expect(resp.body.error.message).toMatch('End time cannot be before start time.')
+    })
+    
+    it('badrequest if requesting too many', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                quantity: 100
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toMatch('Quantity requested exceeds quantity available at intended reservation time. (Requested: 100. Quantity available at reservation time: 10).')
+    })
+    
+    it('badrequest if requesting too many at new time', async () => {
+        const resp = await request(app)
+            .patch(`/reservations/${testResvIds[0]}`)
+            .send({
+                startTime: '2022-01-01T02:30:00',
+                endTime: '2022-01-01T03:45:00',
+                timeZone: 'America/Chicago',
+                quantity: 10
+            })
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body.error.message).toMatch('Quantity requested exceeds quantity available at intended reservation time. (Requested: 10. Quantity available at reservation time: 9).')
     })
 
     it('notfound if reservation not found', async () => {
