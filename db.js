@@ -2,7 +2,8 @@
 
 /** Database setup for Instrument Closet. */
 
-import { Client } from 'pg';
+import pgPKG from 'pg';
+const { Client } = pgPKG;
 import { getDatabaseUri } from './config';
 
 let db;

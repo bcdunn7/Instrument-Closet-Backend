@@ -9,8 +9,7 @@ import userRoutes from './routes/users';
 import authRoutes from './routes/auth';
 import instRoutes from './routes/instruments';
 import resvRoutes from './routes/reservations';
-
-const morgan = require('morgan');
+import morgan from 'morgan';
 
 const app = express();
 
