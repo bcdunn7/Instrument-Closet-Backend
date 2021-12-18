@@ -1,0 +1,17 @@
+{ "$id": "http://example.com/example.json",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "properties": {
+        "_token": {
+            "$id": "#/properties/_token",
+            "default": "",
+            "type": "string"
+        },
+        "name": {
+            "$id": "#/properties/startTime",
+            "default": "",
+            "type": "string"
+        }
+    },
+    "additionalProperties": false
+}

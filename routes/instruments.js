@@ -8,6 +8,7 @@ import newInstrumentSchema from '../schemas/newInstrumentSchema.json';
 import updateInstrumentSchema from '../schemas/updateInstrumentSchema.json';
 import getReservationsSchema from '../schemas/getReservationsSchema.json';
 import toggleCategorySchema from '../schemas/toggleCategorySchema.json';
+import searchInstrumentsSchema from '../schemas/searchInstrumentsSchema.json';
 import { BadRequestError } from '../expressError';
 import convertToUnix from '../helpers/time';
 
@@ -42,14 +43,23 @@ router.post('/', ensureAdmin, async (req, res, next) => {
 
 
 /** GET /instruments => { instruments: [{id, name, quantity, description, imageURL, categories: [{id, name}, ...]}, ...]} 
+ * @param {string} name - optional nameLike to find case insensitive partial matches
  * 
  * @return list of all instruments
  * 
  * AUTH: logged-in
 */
 router.get('/', ensureLoggedIn, async (req, res, next) => {
+    const q = req.query;
+
     try {
-        const instruments = await Instrument.findAll();
+        const validator = jsonschema.validate(q, searchInstrumentsSchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        }
+
+        const instruments = await Instrument.findAll(q);
         return res.json({ instruments })
     } catch (e) {
         return next(e);

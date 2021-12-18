@@ -296,6 +296,25 @@ describe('GET /instruments', () => {
         expect(resp.body).toEqual({
             instruments: instArr})
     })
+
+    it('returns list of filtered instruments: admin', async () => {
+        const resp = await request(app)
+            .get('/instruments?name=st1')
+            .set('authorization', `Bearer ${a1token}`);
+
+        expect(resp.body.instruments).toEqual([{
+            id: testInstIds[0],
+            name: 'inst1',
+            quantity: 1,
+            description: 'desc of inst1',
+            imageURL: 'inst1.png',
+            categories: [{
+                id: testCatIds[0],
+                category: 'cat1'
+            }]
+
+        }])
+    })
     
     it('unauth if anon', async () => {
         const resp = await request(app)

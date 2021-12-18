@@ -56,15 +56,29 @@ class Instrument {
      * 
      * @return {Promise<array>} - promise when resolved bears instrumets array [{id, name, quantity, description, imageURL, categories: [{id, category}, ...]}, ...]
      */
-    static async findAll() {
-        const res = await db.query(`
-            SELECT id,
-                    name,
-                    quantity,
-                    description,
-                    image_url AS "imageURL"
-            FROM instruments
-        `)
+    static async findAll(searchFilters = {}) {
+        let query = `SELECT id,
+                            name,
+                            quantity,
+                            description,
+                            image_url AS "imageURL"
+                    FROM instruments`
+        let whereExpressions = [];
+        let queryValues = [];
+
+        const { name } = searchFilters;
+
+        if (name) {
+            queryValues.push(`%${name}%`);
+            whereExpressions.push(`name ILIKE $${queryValues.length}`);
+        }
+
+        if (whereExpressions.length > 0) {
+            query += " WHERE " + whereExpressions.join(" AND ");
+        }
+
+        query += " ORDER BY name";
+        const res = await db.query(query, queryValues);
 
         const instruments = await Promise.all(res.rows.map(async (i) => {
             const inst = new Instrument(i);

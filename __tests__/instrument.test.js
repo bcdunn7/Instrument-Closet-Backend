@@ -194,6 +194,19 @@ describe('findAll', () => {
 
         expect(instruments[0]).toBeInstanceOf(Instrument);
     })
+
+    it('filters by name', async () => {
+        const instruments = await Instrument.findAll({name: 'st1'});
+
+        expect(instruments).toEqual([{
+            categories: [], 
+            description: "desc of inst1", 
+            id: testInstIds[0], 
+            imageURL: "inst1.png", 
+            name: "inst1", 
+            quantity: 1
+        }])
+    })
 });
 
 describe('get', () => {
