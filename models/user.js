@@ -3,7 +3,7 @@
 import db from '../db';
 import bcrypt from 'bcrypt';
 import { UnauthorizedError, BadRequestError, NotFoundError } from '../expressError';
-
+import Reservation from './reservation';
 import { BCRYPT_WORK_FACTOR } from '../config';
 
 /** User database model */
@@ -159,7 +159,28 @@ class User {
         return user;
     }
 
-    /** Save Instrument
+    /** Get User's Reservations
+     * @async
+     *  Instance method.
+     */
+    async getReservations() {
+        const res = await db.query(`
+            SELECT id,
+                 user_id AS "userId",
+                 instrument_id AS "instrumentId",
+                 quantity,
+                 start_time AS "startTime",
+                 end_time AS "endTime",
+                 notes
+            FROM reservations
+            WHERE user_id = $1`,
+            [this.id]);
+        
+        const reservations = res.rows.map(r => new Reservation(r));
+        return reservations;
+    }
+
+    /** Save User
      * @async
      * 
      * Can only change firstName, lastName, email, and phone with this method

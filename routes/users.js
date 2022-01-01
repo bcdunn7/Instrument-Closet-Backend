@@ -41,6 +41,24 @@ router.get('/:username', ensureCorrectUserOrAdmin, async (req, res, next) => {
 })
 
 
+/** GET /users/[username]/reservations => { reservations }
+ * 
+ * @return Array of reservations for given user => { reservations: [{id, userId, instrumentId, quantity, startTime, endTime, notes}, ...]}
+ * 
+ * AUTH: admin or same user as [username]
+ */
+router.get('/:username/reservations', ensureCorrectUserOrAdmin, async (req, res, next) => {
+    try {
+        const user = await User.get(req.params.username);
+
+        const reservations = await user.getReservations();
+        return res.json({ reservations });
+    } catch (e) {
+        return next(e);
+    }
+})
+
+
 /** PATCH /users/username  { userData } => { user }
  * 
  * userData can include:

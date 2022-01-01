@@ -11,10 +11,14 @@ const u1token = createToken({ username: 'testuser1', isAdmin: false});
 const u2token = createToken({ username: 'testuser2', isAdmin: false});
 const a1token = createToken({ username: 'testadmin1', isAdmin: true});
 
+const testInstIds = [];
 const testUserIds = [];
+const testResvIds = [];
 
 beforeAll(async () => {
     await db.query('DELETE FROM users');
+    await db.query('DELETE FROM instruments');
+    await db.query('DELETE FROM reservations');
 
     const u1 = await User.register({
         username: 'testuser1',
@@ -51,6 +55,26 @@ beforeAll(async () => {
     })
 
     testUserIds.push(a1.id);
+
+    const resultsInsts = await db.query(`
+    INSERT INTO instruments (name, quantity, description, image_url) 
+        VALUES ('inst1', 1, 'desc of inst1', 'inst1.png'),
+        ('inst2', 2, 'desc of inst2', 'inst2.png'),
+        ('inst3', 3, 'desc of inst3', 'inst3.png')
+        RETURNING id`)
+
+    testInstIds.splice(0, 0, ...resultsInsts.rows.map(i => i.id));
+
+    const resultsResvs = await db.query(`
+        INSERT INTO reservations
+            (user_id, instrument_id, quantity, start_time, end_time, notes)
+        VALUES
+            ($1, $2, 1, 1641027600, 1641034800, 'somenotes'),
+            ($3, $4, 2, 1641117600, 1641121200, 'somenotes2')
+        RETURNING id`,
+        [testUserIds[0], testInstIds[0], testUserIds[0], testInstIds[2]]);
+
+    testResvIds.splice(0, 0, ...resultsResvs.rows.map(r => r.id));
 })
 
 beforeEach(async () => {
@@ -210,6 +234,37 @@ describe('GET /users/:username', () => {
             .set('authorization', `Bearer ${a1token}`);
 
         expect(resp.statusCode).toEqual(404);
+    })
+})
+
+describe('GET /users/:username/reservations', () => {
+    it('gets user reservations: admin', async () => {
+        const resp = await request(app)
+            .get('/users/testuser1/reservations')
+            .set('authorization', `Bearer ${a1token}`);
+    
+        expect(resp.body).toEqual({
+            reservations: [
+                    {
+                    endTime: 1641034800,
+                    id: testResvIds[0],
+                    instrumentId: testInstIds[0],
+                    notes: 'somenotes',
+                    quantity: 1,
+                    startTime: 1641027600,
+                    userId: testUserIds[0],
+                    },
+                    {
+                    endTime: 1641121200,
+                    id: testResvIds[1],
+                    instrumentId: testInstIds[2],
+                    notes: 'somenotes2',
+                    quantity: 2,
+                    startTime: 1641117600,
+                    userId: testUserIds[0],
+                    },
+                ]
+        })
     })
 })
 
