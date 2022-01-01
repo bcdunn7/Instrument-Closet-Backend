@@ -165,18 +165,22 @@ class User {
      */
     async getReservations() {
         const res = await db.query(`
-            SELECT id,
-                 user_id AS "userId",
-                 instrument_id AS "instrumentId",
-                 quantity,
-                 start_time AS "startTime",
-                 end_time AS "endTime",
-                 notes
-            FROM reservations
-            WHERE user_id = $1`,
+            SELECT r.id,
+                 r.user_id AS "userId",
+                 r.instrument_id AS "instrumentId",
+                 i.name AS "instrumentName",
+                 r.quantity,
+                 r.start_time AS "startTime",
+                 r.end_time AS "endTime",
+                 r.notes
+            FROM reservations r
+            JOIN instruments i
+            ON i.id = r.instrument_id
+            WHERE user_id = $1
+            ORDER BY r.start_time`,
             [this.id]);
         
-        const reservations = res.rows.map(r => new Reservation(r));
+        const reservations = res.rows;
         return reservations;
     }
 

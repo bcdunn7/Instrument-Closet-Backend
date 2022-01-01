@@ -43,7 +43,7 @@ router.get('/:username', ensureCorrectUserOrAdmin, async (req, res, next) => {
 
 /** GET /users/[username]/reservations => { reservations }
  * 
- * @return Array of reservations for given user => { reservations: [{id, userId, instrumentId, quantity, startTime, endTime, notes}, ...]}
+ * @return Array of reservations for given user => { reservations: [{id, userId, instrumentId, instrumentName, quantity, startTime, endTime, notes}, ...]}
  * 
  * AUTH: admin or same user as [username]
  */
