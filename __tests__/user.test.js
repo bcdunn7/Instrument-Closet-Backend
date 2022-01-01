@@ -224,16 +224,6 @@ describe('get reservations', () => {
 
         expect(resvs).toEqual([
             {
-                endTime: 1641034800,
-                id: testResvIds[0],
-                instrumentId: testInstIds[0],
-                instrumentName: 'inst1',
-                notes: 'somenotes',
-                quantity: 1,
-                startTime: 1641027600,
-                userId: testUserIds[0],
-            },
-            {
                 endTime: 1641121200,
                 id: testResvIds[1],
                 instrumentId: testInstIds[2],
@@ -241,6 +231,16 @@ describe('get reservations', () => {
                 notes: 'somenotes2',
                 quantity: 2,
                 startTime: 1641117600,
+                userId: testUserIds[0],
+            },
+            {
+                endTime: 1641034800,
+                id: testResvIds[0],
+                instrumentId: testInstIds[0],
+                instrumentName: 'inst1',
+                notes: 'somenotes',
+                quantity: 1,
+                startTime: 1641027600,
                 userId: testUserIds[0],
             },
         ])

@@ -177,7 +177,7 @@ class User {
             JOIN instruments i
             ON i.id = r.instrument_id
             WHERE user_id = $1
-            ORDER BY r.start_time`,
+            ORDER BY r.start_time DESC`,
             [this.id]);
         
         const reservations = res.rows;
