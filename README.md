@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Node/Express API that allows developers (or the companion frontend) to reserve and track instrumets from a music inventory closet. It's a specific application of a general inventory management system. It has standard user auth. You can query instruments, reservation, or make a reservation for instruments.
+This is a Node/Express API that allows developers (or the companion frontend which you can find [here](https://github.com/bcdunn7/Instrument-Closet-React-App)) to reserve and track instrumets from a music inventory closet. It's a specific implementation of a general inventory management system. It has standard user auth. You can query instruments, reservation, or make a reservation for instruments.
 
 *Deployed Here:* []()
 
@@ -19,19 +19,22 @@ Require Tech: Node/npm, PostgreSQL
     $ cd path-to-instrument-closet-backend
     ```
 
-* Download dependencies
+* Install dependencies
 
     ```
     $ npm install
     ```
     
-* Create postgresql database
+* Create postgresql database (start postgres if needed)
 
     ```
+    (if needed)
+    sudo service postgresql start
+
     $ createdb instrument_closet
 
     (for testing)
-    $createdb instrument_closet_test
+    $ createdb instrument_closet_test
     ```
 
 * Create .env file in instrument-closet-backend with this information
