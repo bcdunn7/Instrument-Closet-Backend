@@ -162,7 +162,7 @@ router.patch('/:resvId', ensureLoggedIn, async (req, res, next) => {
             }, 0);
             const available = inst.quantity - currReserved;
             
-            if (req.body.quantity > available) throw new BadRequestError(`Quantity requested exceeds quantity available at intended reservation time. (Requested: ${req.body.quantity}. Quantity available at reservation time: ${available}).`);
+            if (req.body.quantity > (available-reservation.quantity)) throw new BadRequestError(`Quantity requested exceeds quantity available at intended reservation time. (Requested: ${req.body.quantity}. Quantity available at reservation time: ${available}).`);
         }
         
         const { quantity, notes } = req.body;
