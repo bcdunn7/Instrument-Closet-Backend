@@ -51,6 +51,12 @@ Require Tech: Node/npm, PostgreSQL
 
 * It is up and running! You can query it using Insomnia or any similar tool, or your own application!
 
+* Test application with npm test
+
+    ```
+    $ npm test
+    ```
+
 ### **Tech Used:**
 - Node
 - Express
