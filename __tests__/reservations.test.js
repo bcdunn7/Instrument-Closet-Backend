@@ -629,7 +629,7 @@ describe('PATCH /reservations/:resvId', () => {
             .set('authorization', `Bearer ${a1token}`);
 
         expect(resp.statusCode).toEqual(400);
-        expect(resp.body.error.message).toMatch('Quantity requested exceeds quantity available at intended reservation time. (Requested: 100. Quantity available at reservation time: 10).')
+        expect(resp.body.error.message).toMatch('Quantity requested exceeds quantity available at intended reservation time. (Requested: 100. Quantity available at reservation time: 11).')
     })
     
     it('badrequest if requesting too many at new time', async () => {
@@ -639,12 +639,12 @@ describe('PATCH /reservations/:resvId', () => {
                 startTime: '2022-01-01T02:30:00',
                 endTime: '2022-01-01T03:45:00',
                 timeZone: 'America/Chicago',
-                quantity: 10
+                quantity: 11
             })
             .set('authorization', `Bearer ${a1token}`);
 
         expect(resp.statusCode).toEqual(400);
-        expect(resp.body.error.message).toMatch('Quantity requested exceeds quantity available at intended reservation time. (Requested: 10. Quantity available at reservation time: 9).')
+        expect(resp.body.error.message).toMatch('Quantity requested exceeds quantity available at intended reservation time. (Requested: 11. Quantity available at reservation time: 10).')
     })
 
     it('notfound if reservation not found', async () => {

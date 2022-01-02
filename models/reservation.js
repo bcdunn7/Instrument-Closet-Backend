@@ -135,8 +135,9 @@ class Reservation {
 
         await db.query(`
             UPDATE reservations
-            SET quantity=$1, start_time=$2, end_time=$3, notes=$4`,
-            [this.quantity, this.startTime, this.endTime, this.notes]);
+            SET quantity=$1, start_time=$2, end_time=$3, notes=$4
+            WHERE id=$5`,
+            [this.quantity, this.startTime, this.endTime, this.notes, this.id]);
     }
 
     /** Deletes Reservation
