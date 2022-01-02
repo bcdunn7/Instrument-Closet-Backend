@@ -83,12 +83,12 @@ router.get('/:instId', ensureLoggedIn, async (req, res, next) => {
 })
 
 
-/** PATCH /instrument/[instId] { instData } => { inst }
+/** PATCH /instruments/[instId] { instData } => { inst }
  * 
  * instData can include: 
  *      { name, quantity, description, imageURL }
  * 
- * @return Instrument instance => { name, quantity, description, imageURL }
+ * @return Instrument instance => {id, name, quantity, description, imageURL, categories: [{id, name}, ...]}
  * 
  * AUTH: admin
 */
