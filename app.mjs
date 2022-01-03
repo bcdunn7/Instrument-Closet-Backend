@@ -14,7 +14,11 @@ import cors from 'cors';
 
 const app = express();
 
-app.use(cors);
+const options = {
+    origin: ['https://the-instrument-closet.surge.sh/']
+}
+
+app.use(cors(options));
 app.use(express.json());
 app.use(morgan('tiny'));
 app.use(authenticateJWT);
