@@ -3,7 +3,6 @@
 import db from '../db';
 import bcrypt from 'bcrypt';
 import { UnauthorizedError, BadRequestError, NotFoundError } from '../expressError';
-import Reservation from './reservation';
 import { BCRYPT_WORK_FACTOR } from '../config';
 
 /** User database model */
