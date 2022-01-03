@@ -2,7 +2,7 @@
   "name": "instrument-closet-backend",
   "version": "1.0.0",
   "description": "\"Backend API for Instrument Closet.\"",
-  "main": "server.js",
+  "main": "server.mjs",
   "type": "module",
   "scripts": {
     "start": "node --experimental-modules --es-module-specifier-resolution=node server.mjs",
