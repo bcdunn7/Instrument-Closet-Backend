@@ -10,8 +10,10 @@ import newReservationSchema from '../schemas/newReservationSchema.json';
 import updateReservationSchema from '../schemas/updateReservationSchema.json';
 import { BadRequestError, UnauthorizedError } from '../expressError';
 import convertToUnix from '../helpers/time';
+import cors from 'cors';
 
 const router = express.Router();
+router.use(cors());
 
 /** POST /reservations { reservation } => { reservation} 
  * 

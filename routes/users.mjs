@@ -6,8 +6,10 @@ import User from '../models/user';
 import jsonschema from 'jsonschema';
 import updateUserSchema from '../schemas/updateUserSchema.json';
 import { BadRequestError } from '../expressError';
+import cors from 'cors';
 
 const router = express.Router();
+router.use(cors());
 
 /** GET /users => { users: [{username, firstName, lastName, email, phone, isAdmin}, ...]} 
  * 
