@@ -3,7 +3,7 @@
 /** Express application for Instrument Closet */
 
 import express from 'express';
-import cors from 'cors';
+import * as cors from 'cors';
 import { NotFoundError } from './expressError';
 import { authenticateJWT } from './middleware/authMiddleware';
 import userRoutes from './routes/users';
