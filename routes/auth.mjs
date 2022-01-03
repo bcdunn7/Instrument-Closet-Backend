@@ -7,10 +7,8 @@ import userAuthSchema from '../schemas/userAuthSchema.json';
 import userRegisterSchema from '../schemas/userRegisterSchema.json';
 import { BadRequestError } from '../expressError';
 import { createToken } from '../helpers/tokens';
-// import cors from 'cors';
-// 
+
 const router = express.Router();
-// router.use(cors());
 
 /** POST /auth/token { username, password} => { token } 
  * 
