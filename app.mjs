@@ -23,10 +23,10 @@ app.use(express.json());
 app.use(morgan('tiny'));
 app.use(authenticateJWT);
 
-app.use('/users', userRoutes);
-app.use('/auth', authRoutes);
-app.use('/instruments', instRoutes);
-app.use('/reservations', resvRoutes);
+app.use('/users', cors(), userRoutes);
+app.use('/auth', cors(), authRoutes);
+app.use('/instruments', cors(), instRoutes);
+app.use('/reservations', cors(), resvRoutes);
 
 
 /** 404 Error */
