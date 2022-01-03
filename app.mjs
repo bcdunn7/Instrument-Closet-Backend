@@ -15,7 +15,9 @@ import cors from 'cors';
 const app = express();
 
 const options = {
-    origin: ['https://the-instrument-closet.surge.sh/']
+    origin: '*',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'PATCH', 'POST', 'DELETE']
 }
 
 app.use(cors(options));
