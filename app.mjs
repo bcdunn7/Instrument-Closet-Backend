@@ -14,22 +14,15 @@ import cors from 'cors';
 
 const app = express();
 
-const options = {
-    origin: '*',
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    methods: ['GET', 'PATCH', 'POST', 'DELETE'],
-    preflightContinue: true
-}
-
-app.use(cors(options));
+app.use(cors());
 app.use(express.json());
 app.use(morgan('tiny'));
 app.use(authenticateJWT);
 
-app.use('/users', cors(), userRoutes);
-app.use('/auth', cors(), authRoutes);
-app.use('/instruments', cors(), instRoutes);
-app.use('/reservations', cors(), resvRoutes);
+app.use('/users', userRoutes);
+app.use('/auth', authRoutes);
+app.use('/instruments', instRoutes);
+app.use('/reservations', resvRoutes);
 
 
 /** 404 Error */
