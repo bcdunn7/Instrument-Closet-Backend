@@ -17,7 +17,8 @@ const app = express();
 const options = {
     origin: '*',
     allowedHeaders: ['Content-Type', 'Authorization'],
-    methods: ['GET', 'PATCH', 'POST', 'DELETE']
+    methods: ['GET', 'PATCH', 'POST', 'DELETE'],
+    preflightContinue: true
 }
 
 app.use(cors(options));
