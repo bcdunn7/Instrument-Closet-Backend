@@ -11,8 +11,10 @@ import toggleCategorySchema from '../schemas/toggleCategorySchema.json';
 import searchInstrumentsSchema from '../schemas/searchInstrumentsSchema.json';
 import { BadRequestError } from '../expressError';
 import convertToUnix from '../helpers/time';
+import cors from 'cors';
 
 const router = express.Router();
+router.use(cors());
 
 /** POST /instruments { instrument } => { instrument }
  * 
