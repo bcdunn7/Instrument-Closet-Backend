@@ -3,7 +3,7 @@
 /** Express application for Instrument Closet */
 
 import express from 'express';
-import * as cors from 'cors';
+import { createRequire } from 'module';
 import { NotFoundError } from './expressError';
 import { authenticateJWT } from './middleware/authMiddleware';
 import userRoutes from './routes/users';
@@ -11,6 +11,10 @@ import authRoutes from './routes/auth';
 import instRoutes from './routes/instruments';
 import resvRoutes from './routes/reservations';
 import morgan from 'morgan';
+
+const requireNative = createRequire(import.meta.url);
+
+const cors = requireNative('cors');
 
 const app = express();
 
